@@ -2,6 +2,33 @@
 
 ## [Unreleased]
 
+#### Added
+
+- Container is now thread-safe. A single reentrant lock (exposed internally
+  via `Container.SyncRoot` and shared with `MethodContainer`, `BindData` and
+  `Bindable`) protects every mutable collection in the container graph.
+  User-supplied closures (bind factories, `OnResolving` / `OnAfterResolving`
+  / `OnRelease`, `Extend` closures, `OnRebound` callbacks) may re-enter the
+  container from the same thread safely; they must not block waiting for
+  another thread to re-enter the container from inside a closure.
+- Informational micro-benchmark `TestBenchmarkMakeSingleton` measures
+  `Make(singleton)` throughput (observed ~120 ns/op on .NET Core 3.0 /
+  modern x64; the single-threaded overhead of the lock is dwarfed by
+  reflection and dictionary work).
+
+#### Fixed
+
+- `Container.BuildStack` and `UserParamsStack` are now per-thread
+  (`ThreadLocal<Stack<T>>`). Previously they were shared instance fields,
+  which on concurrent `Make()` calls caused false-positive circular-
+  dependency exceptions and corrupted user-param lookups.
+
+#### Changed
+
+- `Container` implements `IDisposable` to release the per-thread build-
+  stack handles. Test fixtures holding a `Container`/`Application` field
+  must follow suit (done here for `TestsApplication` and `TestsBindData`).
+
 #### Removed (Breaking)
 
 - Removed the static `CatLib.App` facade class. The global static accessor was a
