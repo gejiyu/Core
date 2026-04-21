@@ -13,6 +13,7 @@ using CatLib.Exception;
 using CatLib.Util;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
@@ -82,9 +83,10 @@ namespace CatLib.Container
         private readonly Dictionary<string, List<Func<object, IContainer, object>>> extenders;
 
         /// <summary>
-        /// The type finder convert a string to a service type.
+        /// The type finders that convert a string to a service type.
+        /// <para>Entries are kept sorted by ascending priority; iteration walks them in that order.</para>
         /// </summary>
-        private readonly SortSet<Func<string, Type>, int> findType;
+        private readonly List<(Func<string, Type> Finder, int Priority)> findType;
 
         /// <summary>
         /// The cache that has been type found.
@@ -97,9 +99,12 @@ namespace CatLib.Container
         private readonly HashSet<string> resolved;
 
         /// <summary>
-        /// The singleton service build timing.
+        /// The order in which singleton instances were created.
+        /// <para><see cref="instanceTimingOrder"/> preserves insertion order (used to release in
+        /// reverse build order); <see cref="instanceTimingSet"/> gives O(1) existence checks.</para>
         /// </summary>
-        private readonly SortSet<string, int> instanceTiming;
+        private readonly List<string> instanceTimingOrder;
+        private readonly HashSet<string> instanceTimingSet;
 
         /// <summary>
         /// All of the registered rebound callbacks.
@@ -146,11 +151,6 @@ namespace CatLib.Container
         private bool disposed;
 
         /// <summary>
-        /// The unique Id is used to mark the global build order.
-        /// </summary>
-        private int instanceId;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Container"/> class.
         /// </summary>
         /// <param name="prime">The estimated number of services.</param>
@@ -168,16 +168,16 @@ namespace CatLib.Container
             release = new List<Action<IBindData, object>>((int)(prime * 0.25));
             extenders = new Dictionary<string, List<Func<object, IContainer, object>>>((int)(prime * 0.25));
             resolved = new HashSet<string>();
-            findType = new SortSet<Func<string, Type>, int>();
+            findType = new List<(Func<string, Type>, int)>();
             findTypeCache = new Dictionary<string, Type>(prime * 4);
             rebound = new Dictionary<string, List<Action<object>>>(prime);
-            instanceTiming = new SortSet<string, int>();
+            instanceTimingOrder = new List<string>();
+            instanceTimingSet = new HashSet<string>();
             buildStackLocal = new ThreadLocal<Stack<string>>(() => new Stack<string>(32));
             userParamsStackLocal = new ThreadLocal<Stack<object[]>>(() => new Stack<object[]>(32));
             skipped = new object();
             methodContainer = new MethodContainer(this);
             flushing = false;
-            instanceId = 0;
         }
 
         /// <summary>
@@ -255,7 +255,13 @@ namespace CatLib.Container
                     throw new LogicException($"Tag \"{tag}\" is not exist.");
                 }
 
-                return Arr.Map(services, (service) => Make(service));
+                var results = new object[services.Count];
+                for (var i = 0; i < services.Count; i++)
+                {
+                    results[i] = Make(services[i]);
+                }
+
+                return results;
             }
         }
 
@@ -646,9 +652,9 @@ namespace CatLib.Container
                     instancesReverse.Add(instance, service);
                 }
 
-                if (!instanceTiming.Contains(service))
+                if (instanceTimingSet.Add(service))
                 {
-                    instanceTiming.Add(service, instanceId++);
+                    instanceTimingOrder.Add(service);
                 }
 
                 if (isResolved)
@@ -704,9 +710,9 @@ namespace CatLib.Container
 
                 instances.Remove(service);
 
-                if (!HasOnReboundCallbacks(service))
+                if (!HasOnReboundCallbacks(service) && instanceTimingSet.Remove(service))
                 {
-                    instanceTiming.Remove(service);
+                    instanceTimingOrder.Remove(service);
                 }
 
                 return true;
@@ -720,7 +726,28 @@ namespace CatLib.Container
             lock (syncRoot)
             {
                 GuardFlushing();
-                findType.Add(func, priority);
+
+                // Keep the finder with the latest priority if the same delegate is registered twice.
+                for (var i = findType.Count - 1; i >= 0; i--)
+                {
+                    if (findType[i].Finder.Equals(func))
+                    {
+                        findType.RemoveAt(i);
+                    }
+                }
+
+                // Stable insertion sorted by ascending priority.
+                var insertAt = findType.Count;
+                for (var i = 0; i < findType.Count; i++)
+                {
+                    if (findType[i].Priority > priority)
+                    {
+                        insertAt = i;
+                        break;
+                    }
+                }
+
+                findType.Insert(insertAt, (func, priority));
             }
 
             return this;
@@ -804,9 +831,11 @@ namespace CatLib.Container
                 try
                 {
                     flushing = true;
-                    foreach (var service in instanceTiming.GetIterator(false))
+
+                    // Release in reverse build order (most recently created first).
+                    for (var i = instanceTimingOrder.Count - 1; i >= 0; i--)
                     {
-                        Release(service);
+                        Release(instanceTimingOrder[i]);
                     }
 
                     Guard.Requires<AssertException>(instances.Count <= 0);
@@ -826,8 +855,8 @@ namespace CatLib.Container
                     UserParamsStack.Clear();
                     rebound.Clear();
                     methodContainer.Flush();
-                    instanceTiming.Clear();
-                    instanceId = 0;
+                    instanceTimingOrder.Clear();
+                    instanceTimingSet.Clear();
                 }
                 finally
                 {
@@ -1032,7 +1061,18 @@ namespace CatLib.Container
                     continue;
                 }
 
-                Arr.RemoveAt(ref userParams, n);
+                var shrunk = new object[userParams.Length - 1];
+                if (n > 0)
+                {
+                    Array.Copy(userParams, 0, shrunk, 0, n);
+                }
+
+                if (n < userParams.Length - 1)
+                {
+                    Array.Copy(userParams, n + 1, shrunk, n, userParams.Length - n - 1);
+                }
+
+                userParams = shrunk;
                 return userParam;
             }
 
@@ -1457,7 +1497,7 @@ namespace CatLib.Container
                 return result;
             }
 
-            foreach (var finder in findType)
+            foreach (var (finder, _) in findType)
             {
                 var type = finder.Invoke(service);
                 if (type != null)
@@ -2017,14 +2057,7 @@ namespace CatLib.Container
         {
             // Filter is used here without using Remove because
             // the IParams is also one of the types that you might want to inject.
-            var elements = Arr.Filter(userParams, value => value is IParams);
-            var results = new IParams[elements.Length];
-            for (var i = 0; i < elements.Length; i++)
-            {
-                results[i] = (IParams)elements[i];
-            }
-
-            return results;
+            return userParams.OfType<IParams>().ToArray();
         }
 
         /// <summary>
