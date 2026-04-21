@@ -49,8 +49,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public void Unbind()
         {
-            isDestroy = true;
-            ReleaseBind();
+            lock (container.SyncRoot)
+            {
+                isDestroy = true;
+                ReleaseBind();
+            }
         }
 
         /// <summary>
@@ -60,38 +63,44 @@ namespace CatLib.Container
         /// <param name="given">Given specified service or alias.</param>
         internal void AddContextual(string needs, string given)
         {
-            AssertDestroyed();
-            if (contextual == null)
+            lock (container.SyncRoot)
             {
-                contextual = new Dictionary<string, string>();
-            }
+                AssertDestroyed();
+                if (contextual == null)
+                {
+                    contextual = new Dictionary<string, string>();
+                }
 
-            if (contextual.ContainsKey(needs)
-                || (contextualClosure != null && contextualClosure.ContainsKey(needs)))
-            {
-                throw new LogicException($"Needs [{needs}] is already exist.");
-            }
+                if (contextual.ContainsKey(needs)
+                    || (contextualClosure != null && contextualClosure.ContainsKey(needs)))
+                {
+                    throw new LogicException($"Needs [{needs}] is already exist.");
+                }
 
-            contextual.Add(needs, given);
+                contextual.Add(needs, given);
+            }
         }
 
         /// <inheritdoc cref="AddContextual(string, string)"/>
         /// <param name="given">The closure return the given service instance.</param>
         internal void AddContextual(string needs, Func<object> given)
         {
-            AssertDestroyed();
-            if (contextualClosure == null)
+            lock (container.SyncRoot)
             {
-                contextualClosure = new Dictionary<string, Func<object>>();
-            }
+                AssertDestroyed();
+                if (contextualClosure == null)
+                {
+                    contextualClosure = new Dictionary<string, Func<object>>();
+                }
 
-            if (contextualClosure.ContainsKey(needs)
-                || (contextual != null && contextual.ContainsKey(needs)))
-            {
-                throw new LogicException($"Needs [{needs}] is already exist.");
-            }
+                if (contextualClosure.ContainsKey(needs)
+                    || (contextual != null && contextual.ContainsKey(needs)))
+                {
+                    throw new LogicException($"Needs [{needs}] is already exist.");
+                }
 
-            contextualClosure.Add(needs, given);
+                contextualClosure.Add(needs, given);
+            }
         }
 
         /// <summary>

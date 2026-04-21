@@ -126,14 +126,18 @@ namespace CatLib.Container
         private void AddClosure(Action<IBindData, object> closure, ref List<Action<IBindData, object>> collection)
         {
             Guard.Requires<ArgumentNullException>(closure != null);
-            AssertDestroyed();
 
-            if (collection == null)
+            lock (((CatLibContainer)Container).SyncRoot)
             {
-                collection = new List<Action<IBindData, object>>();
-            }
+                AssertDestroyed();
 
-            collection.Add(closure);
+                if (collection == null)
+                {
+                    collection = new List<Action<IBindData, object>>();
+                }
+
+                collection.Add(closure);
+            }
         }
     }
 }
