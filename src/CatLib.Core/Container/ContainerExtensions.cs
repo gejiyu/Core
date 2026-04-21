@@ -821,9 +821,9 @@ namespace CatLib.Container
         {
             container.Extend(null, (instance, c) =>
             {
-                if (instance is TConcrete)
+                if (instance is TConcrete typed)
                 {
-                    return closure((TConcrete)instance, c);
+                    return closure(typed, c);
                 }
 
                 return instance;
@@ -841,9 +841,9 @@ namespace CatLib.Container
         {
             container.Extend(null, (instance, _) =>
             {
-                if (instance is TConcrete)
+                if (instance is TConcrete typed)
                 {
-                    return closure((TConcrete)instance);
+                    return closure(typed);
                 }
 
                 return instance;
@@ -873,9 +873,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return container.OnRelease((_, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure((T)instance);
+                    closure(typed);
                 }
             });
         }
@@ -891,9 +891,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return container.OnRelease((bindData, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure(bindData, (T)instance);
+                    closure(bindData, typed);
                 }
             });
         }
@@ -926,9 +926,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return container.OnResolving((_, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure((T)instance);
+                    closure(typed);
                 }
             });
         }
@@ -946,9 +946,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return container.OnResolving((bindData, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure(bindData, (T)instance);
+                    closure(bindData, typed);
                 }
             });
         }
@@ -981,9 +981,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return container.OnAfterResolving((_, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure((T)instance);
+                    closure(typed);
                 }
             });
         }
@@ -1001,9 +1001,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return container.OnAfterResolving((bindData, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure(bindData, (T)instance);
+                    closure(bindData, typed);
                 }
             });
         }
@@ -1069,12 +1069,13 @@ namespace CatLib.Container
 
         /// <summary>
         /// Extract the trailing identifier token (method name) from <paramref name="pattern"/>.
-        /// Characters outside [A-Za-z0-9_] act as separators; a trailing run of digits is trimmed
-        /// so inputs like <c>"Foo.Bar42"</c> resolve to <c>"Bar"</c>.
+        /// Characters outside <c>[A-Za-z0-9_]</c> act as separators; any leading digits
+        /// of the extracted token are trimmed so the result is a valid C# identifier
+        /// (e.g. <c>"Foo.42Bar"</c> resolves to <c>"Bar"</c>).
         /// </summary>
         /// <remarks>
         /// Inlined here so <see cref="ContainerExtensions"/> no longer depends on
-        /// <c>CatLib.Util.Str</c>; behavior must match the former <c>Str.Method</c> exactly.
+        /// <c>CatLib.Util.Str</c>; behavior matches the former <c>Str.Method</c> exactly.
         /// </remarks>
         private static string ExtractMethodName(string pattern)
         {
@@ -1083,40 +1084,29 @@ namespace CatLib.Container
                 return string.Empty;
             }
 
-            var chars = new char[pattern.Length];
-            var count = 0;
-            for (var i = pattern.Length - 1; i >= 0; i--)
+            // Walk back over the trailing identifier run.
+            var end = pattern.Length;
+            var start = end;
+            while (start > 0 && IsIdentifierChar(pattern[start - 1]))
             {
-                var segment = pattern[i];
-                if ((segment >= 'A' && segment <= 'Z')
-                    || (segment >= 'a' && segment <= 'z')
-                    || (segment >= '0' && segment <= '9')
-                    || segment == '_')
-                {
-                    chars[count++] = segment;
-                    continue;
-                }
-
-                if (count > 0)
-                {
-                    break;
-                }
+                start--;
             }
 
-            for (var i = count - 1; i >= 0; i--)
+            // Strip leading digits: a C# identifier must not start with one.
+            while (start < end && pattern[start] >= '0' && pattern[start] <= '9')
             {
-                if (chars[i] >= '0' && chars[i] <= '9')
-                {
-                    count--;
-                    continue;
-                }
-
-                break;
+                start++;
             }
 
-            Array.Resize(ref chars, count);
-            Array.Reverse(chars);
-            return new string(chars);
+            return pattern.Substring(start, end - start);
+        }
+
+        private static bool IsIdentifierChar(char c)
+        {
+            return (c >= 'A' && c <= 'Z')
+                || (c >= 'a' && c <= 'z')
+                || (c >= '0' && c <= '9')
+                || c == '_';
         }
     }
 }

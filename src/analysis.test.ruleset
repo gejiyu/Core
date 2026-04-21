@@ -11,13 +11,12 @@
 	<Rule Id="S1121" Action="None" /> <!-- Assignments should not be made from within sub-expressions -->
 	<Rule Id="S2699" Action="None" /> <!-- Tests should include assertions -->
 	<Rule Id="S2187" Action="None" /> <!-- Add some tests in the file -->
-	<!-- Test-style rules new in SonarAnalyzer 8+/10. Suppressed to keep the .NET 8
-	     upgrade focused; the existing MSTest style (ExpectedException, AreEqual with
-	     bool literals, explicit params arrays) is valid and not worth rewriting here. -->
+	<!-- Test-style rules new in SonarAnalyzer 10. The existing MSTest style
+	     (ExpectedException, AreEqual with bool literals, empty fixture classes)
+	     is valid idiomatic MSTest and rewriting it buys us nothing. -->
 	<Rule Id="S2094" Action="None" /> <!-- Remove empty class (test fixtures for abstract types) -->
 	<Rule Id="S2701" Action="None" /> <!-- Literal boolean passed as argument to Assert.AreEqual -->
 	<Rule Id="S3431" Action="None" /> <!-- Replace ExpectedException with throw assertion / try-catch -->
-	<Rule Id="S3878" Action="None" /> <!-- Remove array creation and pass the elements directly -->
 	<Rule Id="S3993" Action="None" /> <!-- Specify AttributeUsage explicitly even when inherited -->
   </Rules>
 </RuleSet>

@@ -36,15 +36,10 @@
 	<Rule Id="S907" Action="None" /> <!-- "goto" statement should not be used -->
 	<Rule Id="S1135" Action="None" /> <!-- Track uses of "TODO" tags -->
 	<Rule Id="S3925" Action="None" /> <!-- "ISerializable" should be implemented correctly -->
-	<!-- The rules below are new in SonarAnalyzer 8+/10. They are suppressed here to
-	     keep the .NET 8 upgrade focused on CI / test tooling without touching the
-	     netstandard2.0 core library. Revisit in a dedicated modernization PR. -->
-	<Rule Id="S1168" Action="None" /> <!-- Return an empty collection instead of null -->
-	<Rule Id="S2325" Action="None" /> <!-- Methods that do not access instance data should be static -->
-	<Rule Id="S2955" Action="None" /> <!-- Generic "== null" guard: would require "where T : class" (breaking generic API) -->
+	<!-- New in SonarAnalyzer 10 and intentionally suppressed. Each is a deliberate
+	     design choice for an IoC container, not an oversight. -->
 	<Rule Id="S3011" Action="None" /> <!-- Non-public reflection: intentional for IoC resolution -->
-	<Rule Id="S3247" Action="None" /> <!-- Replace type-check-and-cast with pattern matching -->
-	<Rule Id="S3260" Action="None" /> <!-- Private classes not derived in the current assembly should be sealed -->
-	<Rule Id="S3267" Action="None" /> <!-- Loops should be simplified using "Where" LINQ method -->
+	<Rule Id="S2955" Action="None" /> <!-- Generic "== null": can't `where T : class` without breaking the API -->
+	<Rule Id="S2325" Action="None" /> <!-- "Make method static": fights SA1204 without improving design -->
   </Rules>
 </RuleSet>

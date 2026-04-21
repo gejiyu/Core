@@ -53,9 +53,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return bindData.OnResolving((_, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure((T)instance);
+                    closure(typed);
                 }
             });
         }
@@ -66,9 +66,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return bindData.OnResolving((bind, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure(bind, (T)instance);
+                    closure(bind, typed);
                 }
             });
         }
@@ -100,9 +100,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return bindData.OnAfterResolving((_, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure((T)instance);
+                    closure(typed);
                 }
             });
         }
@@ -113,9 +113,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return bindData.OnAfterResolving((bind, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure(bind, (T)instance);
+                    closure(bind, typed);
                 }
             });
         }
@@ -147,9 +147,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return bindData.OnRelease((_, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure((T)instance);
+                    closure(typed);
                 }
             });
         }
@@ -160,9 +160,9 @@ namespace CatLib.Container
             Guard.Requires<ArgumentNullException>(closure != null);
             return bindData.OnRelease((bind, instance) =>
             {
-                if (instance is T)
+                if (instance is T typed)
                 {
-                    closure(bind, (T)instance);
+                    closure(bind, typed);
                 }
             });
         }

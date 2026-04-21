@@ -15,7 +15,7 @@
   `Array.Copy`). `Util/Guard.cs` remains because container code depends
   on it for argument validation.
 - The corresponding test files were removed. Expect a drop from 732 to
-  162 tests; the deleted ones all exercised the removed modules.
+  161 tests; the deleted ones all exercised the removed modules.
 
 #### Changed
 
@@ -42,9 +42,12 @@
   replaced by `Microsoft.CodeAnalysis.NetAnalyzers` 9.0.0; `StyleCop.Analyzers`
   1.1.118 → 1.2.0-beta.556; `SonarAnalyzer.CSharp` 7.17 → 10.3. The obsolete
   explicit `Microsoft.CodeAnalysis.CSharp` pin (only needed by FxCopAnalyzers)
-  is removed. New Sonar rules that would require semantic changes to the
-  netstandard2.0 core are suppressed in `analysis.ruleset`; they can be
-  triaged individually in a follow-up modernization PR.
+  is removed. New Sonar rules that had actionable hits were fixed in place
+  (`is T typed` pattern matching, `Array.Empty<T>()` instead of `null`
+  collection returns); three rules remain intentionally suppressed in
+  `analysis.ruleset` where the diagnostic conflicts with the container design
+  (`S3011` non-public reflection, `S2955` generic null check, `S2325`
+  make-method-static vs `SA1204` ordering).
 
 #### Fixed
 
@@ -139,8 +142,6 @@
 
 #### Fixed
 
-- `CombineStream.Seek` now passes the correct `paramName` and `actualValue` to
-  `ArgumentOutOfRangeException` (was a literal description string).
 - Internal field `Container.afterResloving` renamed to `afterResolving`; doc
   comments `gloabl`, `speified`, local variable `newGloablPosition`, and test
   names `TestBoostrap*` / `TestMakeAttributeInjectFaild*` /

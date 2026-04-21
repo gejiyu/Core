@@ -727,27 +727,11 @@ namespace CatLib.Container
             {
                 GuardFlushing();
 
-                // Keep the finder with the latest priority if the same delegate is registered twice.
-                for (var i = findType.Count - 1; i >= 0; i--)
-                {
-                    if (findType[i].Finder.Equals(func))
-                    {
-                        findType.RemoveAt(i);
-                    }
-                }
-
-                // Stable insertion sorted by ascending priority.
-                var insertAt = findType.Count;
-                for (var i = 0; i < findType.Count; i++)
-                {
-                    if (findType[i].Priority > priority)
-                    {
-                        insertAt = i;
-                        break;
-                    }
-                }
-
-                findType.Insert(insertAt, (func, priority));
+                // Drop any prior registration of the same delegate, then insert
+                // at the position that keeps the list sorted by ascending priority.
+                findType.RemoveAll(entry => entry.Finder.Equals(func));
+                var insertAt = findType.FindIndex(entry => entry.Priority > priority);
+                findType.Insert(insertAt < 0 ? findType.Count : insertAt, (func, priority));
             }
 
             return this;
@@ -1061,17 +1045,10 @@ namespace CatLib.Container
                     continue;
                 }
 
+                // Drop the consumed element by copying the two surrounding slices; Array.Copy is a no-op when length is 0.
                 var shrunk = new object[userParams.Length - 1];
-                if (n > 0)
-                {
-                    Array.Copy(userParams, 0, shrunk, 0, n);
-                }
-
-                if (n < userParams.Length - 1)
-                {
-                    Array.Copy(userParams, n + 1, shrunk, n, userParams.Length - n - 1);
-                }
-
+                Array.Copy(userParams, 0, shrunk, 0, n);
+                Array.Copy(userParams, n + 1, shrunk, n, userParams.Length - n - 1);
                 userParams = shrunk;
                 return userParam;
             }
@@ -1951,7 +1928,7 @@ namespace CatLib.Container
         private void TriggerOnRebound(string service, object instance = null)
         {
             var callbacks = GetOnReboundCallbacks(service);
-            if (callbacks == null || callbacks.Count <= 0)
+            if (callbacks.Count <= 0)
             {
                 return;
             }
@@ -1984,13 +1961,16 @@ namespace CatLib.Container
         }
 
         /// <summary>
-        /// Gets the specified service all of the rebound callbacks.
+        /// Gets the rebound callbacks registered for the specified service,
+        /// or an empty array if none.
         /// </summary>
         /// <param name="service">The service name.</param>
-        /// <returns>The rebound callbacks list.</returns>
+        /// <returns>The rebound callbacks list; never null.</returns>
         private IList<Action<object>> GetOnReboundCallbacks(string service)
         {
-            return !rebound.TryGetValue(service, out List<Action<object>> result) ? null : result;
+            return rebound.TryGetValue(service, out List<Action<object>> result)
+                ? (IList<Action<object>>)result
+                : Array.Empty<Action<object>>();
         }
 
         /// <summary>
@@ -2000,8 +1980,7 @@ namespace CatLib.Container
         /// <returns>True if the rebound callback exists. otherwise false.</returns>
         private bool HasOnReboundCallbacks(string service)
         {
-            var result = GetOnReboundCallbacks(service);
-            return result != null && result.Count > 0;
+            return GetOnReboundCallbacks(service).Count > 0;
         }
 
         /// <summary>
@@ -2055,8 +2034,8 @@ namespace CatLib.Container
         /// <returns>An array of <see cref="IParams"/> parameters.</returns>
         private IParams[] GetParamsTypeInUserParams(ref object[] userParams)
         {
-            // Filter is used here without using Remove because
-            // the IParams is also one of the types that you might want to inject.
+            // Collect the IParams entries without removing them: an IParams
+            // instance is also a legitimate candidate for direct injection.
             return userParams.OfType<IParams>().ToArray();
         }
 
