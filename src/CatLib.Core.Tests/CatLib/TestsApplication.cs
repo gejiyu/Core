@@ -208,6 +208,17 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
+        public async Task TestLifecycleRejectsWorkerThread()
+        {
+            await AssertThrowsLogicExceptionOnWorker(nameof(application.Bootstrap), () => application.Bootstrap()).ConfigureAwait(false);
+            await AssertThrowsLogicExceptionOnWorker(nameof(application.Init), () => application.Init()).ConfigureAwait(false);
+            await AssertThrowsLogicExceptionOnWorker(nameof(application.Register), () => application.Register(new Mock<IServiceProvider>().Object)).ConfigureAwait(false);
+            await AssertThrowsLogicExceptionOnWorker(nameof(application.Terminate), () => application.Terminate()).ConfigureAwait(false);
+            await AssertThrowsLogicExceptionOnWorker(nameof(application.SetDispatcher), () => application.SetDispatcher(new Mock<IEventDispatcher>().Object)).ConfigureAwait(false);
+            await AssertThrowsLogicExceptionOnWorker("DebugLevel.set", () => application.DebugLevel = DebugLevel.Development).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         public void TestInitAfterRegister()
         {
             var foo = new Mock<IServiceProvider>();
@@ -268,6 +279,24 @@ namespace CatLib.Tests
 
             application.Bootstrap(foo.Object, bar.Object, baz.Object);
             Assert.AreEqual(3, count);
+        }
+
+        private static async Task AssertThrowsLogicExceptionOnWorker(string name, Action call)
+        {
+            var thrown = await Task.Run(() =>
+            {
+                try
+                {
+                    call();
+                    return null;
+                }
+                catch (LogicException ex)
+                {
+                    return ex;
+                }
+            }).ConfigureAwait(false);
+
+            Assert.IsNotNull(thrown, $"{name}: expected LogicException from worker thread but none was thrown");
         }
     }
 }

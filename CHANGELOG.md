@@ -4,6 +4,14 @@
 
 #### Added
 
+- `Application` lifecycle methods now explicitly enforce their
+  single-threaded contract. `Bootstrap`, `Init`, `Register`, `Terminate`,
+  `SetDispatcher` and the `DebugLevel` setter throw `LogicException` when
+  invoked from any thread other than the one that constructed the
+  `Application`. Previously this was an implicit assumption; calling these
+  APIs from a worker thread silently corrupted internal state. Worker
+  threads may still call `Make`, `Instance`, `Bind`, etc. on the
+  thread-safe container surface.
 - Container is now thread-safe. A single reentrant lock (exposed internally
   via `Container.SyncRoot` and shared with `MethodContainer`, `BindData` and
   `Bindable`) protects every mutable collection in the container graph.

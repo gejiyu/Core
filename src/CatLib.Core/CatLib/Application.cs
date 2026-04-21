@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace CatLib
@@ -90,6 +91,7 @@ namespace CatLib
             get => debugLevel;
             set
             {
+                GuardMainThread();
                 debugLevel = value;
                 this.Instance<DebugLevel>(debugLevel);
             }
@@ -101,6 +103,7 @@ namespace CatLib
         /// <param name="dispatcher">The event dispatcher instance.</param>
         public void SetDispatcher(IEventDispatcher dispatcher)
         {
+            GuardMainThread();
             this.dispatcher = dispatcher;
             this.Instance<IEventDispatcher>(dispatcher);
         }
@@ -114,6 +117,7 @@ namespace CatLib
         /// <inheritdoc />
         public virtual void Terminate()
         {
+            GuardMainThread();
             Process = StartProcess.Terminate;
             Raise(new BeforeTerminateEventArgs(this));
             Process = StartProcess.Terminating;
@@ -128,6 +132,7 @@ namespace CatLib
         /// <param name="bootstraps">The given bootstrap classes.</param>
         public virtual void Bootstrap(params IBootstrap[] bootstraps)
         {
+            GuardMainThread();
             Guard.Requires<ArgumentNullException>(bootstraps != null);
 
             if (bootstrapped || Process != StartProcess.Construct)
@@ -174,6 +179,7 @@ namespace CatLib
         /// </summary>
         public virtual void Init()
         {
+            GuardMainThread();
             if (!bootstrapped)
             {
                 throw new LogicException($"You must call {nameof(Bootstrap)}() first.");
@@ -204,6 +210,7 @@ namespace CatLib
         /// <inheritdoc />
         public virtual void Register(IServiceProvider provider, bool force = false)
         {
+            GuardMainThread();
             Guard.Requires<ArgumentNullException>(provider != null, $"Parameter \"{nameof(provider)}\" can not be null.");
 
             if (IsRegistered(provider))
@@ -289,6 +296,28 @@ namespace CatLib
             }
 
             base.GuardConstruct(method);
+        }
+
+        /// <summary>
+        /// Ensures the current call is on the main thread (the thread that constructed
+        /// this <see cref="Application"/>). Lifecycle operations (Bootstrap/Init/Register/
+        /// Terminate/SetDispatcher/DebugLevel) are single-threaded by design; invoking
+        /// them from a worker thread indicates a programming error.
+        /// </summary>
+        /// <param name="method">The calling member name, auto-filled by the compiler.</param>
+        /// <exception cref="LogicException">
+        /// Thrown when invoked from a thread other than the construction thread.
+        /// </exception>
+        protected void GuardMainThread([CallerMemberName] string method = null)
+        {
+            if (IsMainThread)
+            {
+                return;
+            }
+
+            throw new LogicException(
+                $"{nameof(Application)}.{method} must be called from the main thread " +
+                $"(id {mainThreadId}); current thread id is {Thread.CurrentThread.ManagedThreadId}.");
         }
 
         private void RegisterBaseBindings()
