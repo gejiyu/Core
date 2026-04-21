@@ -22,9 +22,19 @@
 - [IOC Container](https://catlib.io/lasted/architecture/container.html)
 
 The core package focuses on the container, the Application lifecycle
-and the event dispatcher. Historical side modules (`CatLib.IO` stream
-wrappers and the `Arr`/`Str`/`SortSet` utility bag) have been removed;
-use the BCL or a dedicated package for those concerns.
+and the event dispatcher. Historical side modules have been removed:
+
+- `CatLib.IO` stream wrappers.
+- `CatLib.Util` utility bag (`Arr`, `Str`, `SortSet`, `Guard`, ...);
+  null checks are now inline `ArgumentNullException` throws.
+- `CatLib.Exception` (`RuntimeException`, `LogicException`,
+  `AssertException`); the container raises standard
+  `System.InvalidOperationException` instead. `UnresolvableException`
+  is preserved for "service cannot be resolved" errors and now
+  inherits directly from `InvalidOperationException`.
+
+Use the BCL or a dedicated package if you need any of the removed
+helpers.
 
 ## Install CatLib Core
 

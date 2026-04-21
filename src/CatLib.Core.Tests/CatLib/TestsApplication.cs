@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -11,7 +11,6 @@
 
 using CatLib.Container;
 using CatLib.EventDispatcher;
-using CatLib.Exception;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -48,7 +47,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestBootstrapRepeat()
         {
             application.Bootstrap();
@@ -57,7 +56,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestInitRepeat()
         {
             application.Bootstrap();
@@ -66,7 +65,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestInitNoBootstrap()
         {
             application.Init();
@@ -116,7 +115,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestRegisterRepeat()
         {
             var foo = new Mock<IServiceProvider>();
@@ -125,7 +124,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestInitingRegister()
         {
             var foo = new Mock<IServiceProvider>();
@@ -142,7 +141,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestTerminateRegister()
         {
             var foo = new Mock<IServiceProvider>();
@@ -210,12 +209,12 @@ namespace CatLib.Tests
         [TestMethod]
         public async Task TestLifecycleRejectsWorkerThread()
         {
-            await AssertThrowsLogicExceptionOnWorker(nameof(application.Bootstrap), () => application.Bootstrap()).ConfigureAwait(false);
-            await AssertThrowsLogicExceptionOnWorker(nameof(application.Init), () => application.Init()).ConfigureAwait(false);
-            await AssertThrowsLogicExceptionOnWorker(nameof(application.Register), () => application.Register(new Mock<IServiceProvider>().Object)).ConfigureAwait(false);
-            await AssertThrowsLogicExceptionOnWorker(nameof(application.Terminate), () => application.Terminate()).ConfigureAwait(false);
-            await AssertThrowsLogicExceptionOnWorker(nameof(application.SetDispatcher), () => application.SetDispatcher(new Mock<IEventDispatcher>().Object)).ConfigureAwait(false);
-            await AssertThrowsLogicExceptionOnWorker("DebugLevel.set", () => application.DebugLevel = DebugLevel.Development).ConfigureAwait(false);
+            await AssertThrowsInvalidOperationExceptionOnWorker(nameof(application.Bootstrap), () => application.Bootstrap()).ConfigureAwait(false);
+            await AssertThrowsInvalidOperationExceptionOnWorker(nameof(application.Init), () => application.Init()).ConfigureAwait(false);
+            await AssertThrowsInvalidOperationExceptionOnWorker(nameof(application.Register), () => application.Register(new Mock<IServiceProvider>().Object)).ConfigureAwait(false);
+            await AssertThrowsInvalidOperationExceptionOnWorker(nameof(application.Terminate), () => application.Terminate()).ConfigureAwait(false);
+            await AssertThrowsInvalidOperationExceptionOnWorker(nameof(application.SetDispatcher), () => application.SetDispatcher(new Mock<IEventDispatcher>().Object)).ConfigureAwait(false);
+            await AssertThrowsInvalidOperationExceptionOnWorker("DebugLevel.set", () => application.DebugLevel = DebugLevel.Development).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -234,7 +233,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestRegistingMake()
         {
             var foo = new Mock<IServiceProvider>();
@@ -247,7 +246,7 @@ namespace CatLib.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestBootstrapDuplicateBootstrap()
         {
             var foo = new Mock<IBootstrap>().Object;
@@ -281,7 +280,7 @@ namespace CatLib.Tests
             Assert.AreEqual(3, count);
         }
 
-        private static async Task AssertThrowsLogicExceptionOnWorker(string name, Action call)
+        private static async Task AssertThrowsInvalidOperationExceptionOnWorker(string name, Action call)
         {
             var thrown = await Task.Run(() =>
             {
@@ -290,13 +289,13 @@ namespace CatLib.Tests
                     call();
                     return null;
                 }
-                catch (LogicException ex)
+                catch (InvalidOperationException ex)
                 {
                     return ex;
                 }
             }).ConfigureAwait(false);
 
-            Assert.IsNotNull(thrown, $"{name}: expected LogicException from worker thread but none was thrown");
+            Assert.IsNotNull(thrown, $"{name}: expected InvalidOperationException from worker thread but none was thrown");
         }
     }
 }

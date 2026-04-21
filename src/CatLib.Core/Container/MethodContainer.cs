@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -12,7 +12,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using CatLib.Exception;
 
 namespace CatLib.Container
 {
@@ -64,7 +63,7 @@ namespace CatLib.Container
             {
                 if (methodMappings.ContainsKey(method))
                 {
-                    throw new LogicException($"Method [{method}] is already {nameof(Bind)}");
+                    throw new InvalidOperationException($"Method [{method}] is already {nameof(Bind)}");
                 }
 
                 var methodBind = new MethodBind(this, container, method, target, methodInfo);
@@ -194,9 +193,9 @@ namespace CatLib.Container
         /// <summary>
         /// Create a method without not found exception.
         /// </summary>
-        private static LogicException MakeMethodNotFoundException(string method)
+        private static InvalidOperationException MakeMethodNotFoundException(string method)
         {
-            return new LogicException($"Method [{method}] is not found.");
+            return new InvalidOperationException($"Method [{method}] is not found.");
         }
 
         /// <summary>

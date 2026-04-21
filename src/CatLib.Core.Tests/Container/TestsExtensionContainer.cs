@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -10,7 +10,6 @@
  */
 
 using CatLib.Container;
-using CatLib.Exception;
 using CatLib.Tests.Fixture;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -316,7 +315,7 @@ namespace CatLib.Tests.Container
 
         [TestMethod]
         [ExpectedExceptionAndMessage(
-            typeof(LogicException),
+            typeof(InvalidOperationException),
             "Function \"method-is-not-found\" not found.")]
         public void TestCallIllegal()
         {
@@ -437,7 +436,7 @@ namespace CatLib.Tests.Container
 
             container.UnbindMethod("foo");
 
-            Assert.ThrowsException<LogicException>(() =>
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 container.Invoke("foo");
             });
@@ -446,7 +445,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestBindMethodExists()
         {
             container.BindMethod("foo", () => "foo");
@@ -474,12 +473,12 @@ namespace CatLib.Tests.Container
             container.UnbindMethod(foo1);
             container.UnbindMethod("unknow-method");
 
-            Assert.ThrowsException<LogicException>(() =>
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 container.Invoke("Foo1.EchoInt", 100);
             });
 
-            Assert.ThrowsException<LogicException>(() =>
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 container.Invoke("Foo1.EchoFloat", 0.5f);
             });

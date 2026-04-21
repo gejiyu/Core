@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -16,7 +16,6 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
-using CatLib.Exception;
 using SException = System.Exception;
 
 namespace CatLib.Container
@@ -259,7 +258,7 @@ namespace CatLib.Container
             {
                 if (!tags.TryGetValue(tag, out List<string> services))
                 {
-                    throw new LogicException($"Tag \"{tag}\" is not exist.");
+                    throw new InvalidOperationException($"Tag \"{tag}\" is not exist.");
                 }
 
                 var results = new object[services.Count];
@@ -377,7 +376,7 @@ namespace CatLib.Container
 
             if (alias == service)
             {
-                throw new LogicException($"Alias is same as service: \"{alias}\".");
+                throw new InvalidOperationException($"Alias is same as service: \"{alias}\".");
             }
 
             lock (syncRoot)
@@ -389,17 +388,17 @@ namespace CatLib.Container
 
                 if (aliases.ContainsKey(alias))
                 {
-                    throw new LogicException($"Alias \"{alias}\" is already exists.");
+                    throw new InvalidOperationException($"Alias \"{alias}\" is already exists.");
                 }
 
                 if (bindings.ContainsKey(alias))
                 {
-                    throw new LogicException($"Alias \"{alias}\" has been used for service name.");
+                    throw new InvalidOperationException($"Alias \"{alias}\" has been used for service name.");
                 }
 
                 if (!bindings.ContainsKey(service) && !instances.ContainsKey(service))
                 {
-                    throw new LogicException(
+                    throw new InvalidOperationException(
                         $"You must {nameof(Bind)}() or {nameof(Instance)}() serivce before and you be able to called {nameof(Alias)}().");
                 }
 
@@ -456,7 +455,7 @@ namespace CatLib.Container
 
             if (IsUnableType(concrete))
             {
-                throw new LogicException($"Type \"{concrete}\" can not bind. please check if there is a list of types that cannot be built.");
+                throw new InvalidOperationException($"Type \"{concrete}\" can not bind. please check if there is a list of types that cannot be built.");
             }
 
             service = FormatService(service);
@@ -485,17 +484,17 @@ namespace CatLib.Container
                 service = FormatService(service);
                 if (bindings.ContainsKey(service))
                 {
-                    throw new LogicException($"Bind [{service}] already exists.");
+                    throw new InvalidOperationException($"Bind [{service}] already exists.");
                 }
 
                 if (instances.ContainsKey(service))
                 {
-                    throw new LogicException($"Instances [{service}] is already exists.");
+                    throw new InvalidOperationException($"Instances [{service}] is already exists.");
                 }
 
                 if (aliases.ContainsKey(service))
                 {
-                    throw new LogicException($"Aliase [{service}] is already exists.");
+                    throw new InvalidOperationException($"Aliase [{service}] is already exists.");
                 }
 
                 var bindData = new BindData(this, service, concrete, isStatic);
@@ -673,7 +672,7 @@ namespace CatLib.Container
                 {
                     if (!bindData.IsStatic)
                     {
-                        throw new LogicException($"Service [{service}] is not Singleton(Static) Bind.");
+                        throw new InvalidOperationException($"Service [{service}] is not Singleton(Static) Bind.");
                     }
                 }
                 else
@@ -687,7 +686,7 @@ namespace CatLib.Container
                     && instancesReverse.TryGetValue(instance, out string realService)
                     && realService != service)
                 {
-                    throw new LogicException($"The instance has been registered as a singleton in {realService}");
+                    throw new InvalidOperationException($"The instance has been registered as a singleton in {realService}");
                 }
 
                 var isResolved = IsResolved(service);
@@ -837,7 +836,7 @@ namespace CatLib.Container
                 service = AliasToService(service);
                 if (!IsResolved(service) && !CanMake(service))
                 {
-                    throw new LogicException(
+                    throw new InvalidOperationException(
                         $"If you want use Rebound(Watch) , please {nameof(Bind)} or {nameof(Instance)} service first.");
                 }
 
@@ -879,7 +878,7 @@ namespace CatLib.Container
 
                     if (instances.Count > 0)
                     {
-                        throw new AssertException();
+                        throw new InvalidOperationException();
                     }
 
                     tags.Clear();
@@ -1468,10 +1467,10 @@ namespace CatLib.Container
         /// </summary>
         /// <param name="service">The name of the service that throws the exception.</param>
         /// <returns>The circular dependency exception.</returns>
-        protected virtual LogicException MakeCircularDependencyException(string service)
+        protected virtual InvalidOperationException MakeCircularDependencyException(string service)
         {
             var message = $"Circular dependency detected while for [{service}]. {GetBuildStackDebugMessage()}";
-            return new LogicException(message);
+            return new InvalidOperationException(message);
         }
 
         /// <summary>
@@ -1503,7 +1502,7 @@ namespace CatLib.Container
         {
             if (count > 255)
             {
-                throw new LogicException($"Too many parameters , must be less or equal than 255 or override the {nameof(GuardUserParamsCount)} method.");
+                throw new InvalidOperationException($"Too many parameters , must be less or equal than 255 or override the {nameof(GuardUserParamsCount)} method.");
             }
         }
 
@@ -1609,12 +1608,12 @@ namespace CatLib.Container
 
             if (!propertyInfo.CanWrite)
             {
-                throw new AssertException($"{GetDebugMessage()}, but the property is not writable.");
+                throw new InvalidOperationException($"{GetDebugMessage()}, but the property is not writable.");
             }
 
             if (!propertyInfo.GetSetMethod(true).IsPublic)
             {
-                throw new AssertException($"{GetDebugMessage()}, but the property is not public.");
+                throw new InvalidOperationException($"{GetDebugMessage()}, but the property is not public.");
             }
 
             return true;
@@ -1716,7 +1715,7 @@ namespace CatLib.Container
             }
 
             exceptionDispatchInfo?.Throw();
-            throw new AssertException("Exception dispatch info is null.");
+            throw new InvalidOperationException("Exception dispatch info is null.");
         }
 
         /// <summary>
@@ -1778,7 +1777,7 @@ namespace CatLib.Container
             {
                 if (service.IndexOf(c) >= 0)
                 {
-                    throw new LogicException(
+                    throw new InvalidOperationException(
                         $"Service name {service} contains disabled characters : {c}. please use Alias replacement");
                 }
             }
@@ -1931,7 +1930,7 @@ namespace CatLib.Container
         {
             if (flushing)
             {
-                throw new LogicException("Container is flushing can not do it");
+                throw new InvalidOperationException("Container is flushing can not do it");
             }
         }
 

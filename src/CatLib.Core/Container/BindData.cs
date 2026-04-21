@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -11,7 +11,6 @@
 
 using System;
 using System.Collections.Generic;
-using CatLib.Exception;
 using CatLibContainer = CatLib.Container.Container;
 
 namespace CatLib.Container
@@ -107,7 +106,7 @@ namespace CatLib.Container
         {
             if (!IsStatic)
             {
-                throw new LogicException(
+                throw new InvalidOperationException(
                     $"Service [{Service}] is not Singleton(Static) Bind , Can not call {nameof(OnRelease)}().");
             }
 

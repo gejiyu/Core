@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -12,7 +12,6 @@
 #pragma warning disable SA1618
 
 using System;
-using CatLib.Exception;
 
 namespace CatLib.Container
 {
@@ -787,7 +786,7 @@ namespace CatLib.Container
 
             if (methodInfo == null)
             {
-                throw new LogicException($"Function \"{method}\" not found.");
+                throw new InvalidOperationException($"Function \"{method}\" not found.");
             }
 
             return container.Call(target, methodInfo, userParams);

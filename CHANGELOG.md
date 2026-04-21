@@ -8,17 +8,37 @@
   `SegmentStream`, `WrapperStream`, `StreamExtensions`) has been deleted.
   These were stream utilities with no dependency on, or from, the container
   and did not belong in a DI package.
-- **Breaking:** the `CatLib.Util` grab-bag is gone apart from `Guard`.
-  `Arr`, `Str`, `SortSet` and `InternalHelper` were general-purpose helpers
-  that the container barely used; their few in-tree call sites were
-  replaced with BCL equivalents (`List<T>` + `HashSet<T>`, LINQ, inline
-  `Array.Copy`). `Util/Guard.cs` remains because container code depends
-  on it for argument validation.
+- **Breaking:** the `CatLib.Util` grab-bag has been removed entirely.
+  `Arr`, `Str`, `SortSet`, `InternalHelper` and finally `Guard` are all
+  gone; their few in-tree call sites were replaced with BCL equivalents
+  (`List<T>` + `HashSet<T>`, LINQ, inline `Array.Copy`, and inline
+  `if (x is null) throw new ArgumentNullException(nameof(x));`).
+- **Breaking:** the `CatLib.Exception` namespace is gone. `RuntimeException`,
+  `LogicException` and `AssertException` were thin reskins of
+  `System.Exception` / `System.InvalidOperationException` and are replaced
+  one-for-one by `System.InvalidOperationException` at every throw site
+  (and at every `ExpectedException` attribute in the test project).
+  `UnresolvableException` is preserved because it carries domain meaning,
+  but its base class has changed from the deleted `RuntimeException` to
+  `System.InvalidOperationException`.
 - The corresponding test files were removed. Expect a drop from 732 to
-  161 tests; the deleted ones all exercised the removed modules.
+  158 tests; the deleted ones all exercised the removed modules.
 
 #### Changed
 
+- **Breaking:** lifecycle events used to live in eleven one-type files under
+  `CatLib/Events/`, each with its own copyright header and namespace block.
+  They are now all defined together in `CatLib/Events/ApplicationEventArgs.cs`.
+  Public types, members, and behaviour are unchanged; only the on-disk
+  layout moved. `SA1402` (one-type-per-file) is disabled in
+  `analysis.ruleset` because grouping tiny, tightly-related types is the
+  whole point of this change.
+- The old `Util.Guard` helper built exceptions via reflection *and* lost
+  the parameter name on every `ArgumentNullException` it raised. Every
+  null check is now an explicit `if (x is null) throw new
+  ArgumentNullException(nameof(x));` at the call site (about ninety of
+  them across nine files). Callers now actually see which parameter was
+  null.
 - `Container` no longer stores `findType` and `instanceTiming` in
   `SortSet`. `findType` is now a `List<(Func, int)>` kept sorted on
   insert by ascending priority; `instanceTiming` is a `List<string>`

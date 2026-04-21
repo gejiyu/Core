@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -12,7 +12,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CatLib.Exception;
 
 namespace CatLib.EventDispatcher
 {
@@ -55,7 +54,7 @@ namespace CatLib.EventDispatcher
         {
             if (sender is EventArgs)
             {
-                throw new LogicException($"Passed event args for the parameter {sender}, Did you make a wrong method call?");
+                throw new InvalidOperationException($"Passed event args for the parameter {sender}, Did you make a wrong method call?");
             }
 
             e = e ?? EventArgs.Empty;

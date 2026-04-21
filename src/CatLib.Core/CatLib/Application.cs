@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -17,7 +17,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using CatLib.Container;
 using CatLib.EventDispatcher;
-using CatLib.Exception;
 
 namespace CatLib
 {
@@ -139,7 +138,7 @@ namespace CatLib
 
             if (bootstrapped || Process != StartProcess.Construct)
             {
-                throw new LogicException($"Cannot repeatedly trigger the {nameof(Bootstrap)}()");
+                throw new InvalidOperationException($"Cannot repeatedly trigger the {nameof(Bootstrap)}()");
             }
 
             Process = StartProcess.Bootstrap;
@@ -158,7 +157,7 @@ namespace CatLib
 
                 if (existed.Contains(bootstrap))
                 {
-                    throw new LogicException($"The bootstrap already exists : {bootstrap}");
+                    throw new InvalidOperationException($"The bootstrap already exists : {bootstrap}");
                 }
 
                 existed.Add(bootstrap);
@@ -184,12 +183,12 @@ namespace CatLib
             GuardMainThread();
             if (!bootstrapped)
             {
-                throw new LogicException($"You must call {nameof(Bootstrap)}() first.");
+                throw new InvalidOperationException($"You must call {nameof(Bootstrap)}() first.");
             }
 
             if (inited || Process != StartProcess.Bootstrapped)
             {
-                throw new LogicException($"Cannot repeatedly trigger the {nameof(Init)}()");
+                throw new InvalidOperationException($"Cannot repeatedly trigger the {nameof(Init)}()");
             }
 
             Process = StartProcess.Init;
@@ -222,7 +221,7 @@ namespace CatLib
             {
                 if (!force)
                 {
-                    throw new LogicException($"Provider [{provider.GetType()}] is already register.");
+                    throw new InvalidOperationException($"Provider [{provider.GetType()}] is already register.");
                 }
 
                 loadedProviders.Remove(provider);
@@ -230,12 +229,12 @@ namespace CatLib
 
             if (Process == StartProcess.Initing)
             {
-                throw new LogicException($"Unable to add service provider during {nameof(StartProcess.Initing)}");
+                throw new InvalidOperationException($"Unable to add service provider during {nameof(StartProcess.Initing)}");
             }
 
             if (Process > StartProcess.Running)
             {
-                throw new LogicException($"Unable to {nameof(Terminate)} in-process registration service provider");
+                throw new InvalidOperationException($"Unable to {nameof(Terminate)} in-process registration service provider");
             }
 
             if (provider is ServiceProvider baseProvider)
@@ -300,7 +299,7 @@ namespace CatLib
         {
             if (registering)
             {
-                throw new LogicException(
+                throw new InvalidOperationException(
                     $"It is not allowed to make services or dependency injection in the {nameof(Register)} process, method:{method}");
             }
 
@@ -314,7 +313,7 @@ namespace CatLib
         /// them from a worker thread indicates a programming error.
         /// </summary>
         /// <param name="method">The calling member name, auto-filled by the compiler.</param>
-        /// <exception cref="LogicException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when invoked from a thread other than the construction thread.
         /// </exception>
         protected void GuardMainThread([CallerMemberName] string method = null)
@@ -324,7 +323,7 @@ namespace CatLib
                 return;
             }
 
-            throw new LogicException(
+            throw new InvalidOperationException(
                 $"{nameof(Application)}.{method} must be called from the main thread " +
                 $"(id {mainThreadId}); current thread id is {Thread.CurrentThread.ManagedThreadId}.");
         }
@@ -340,7 +339,7 @@ namespace CatLib
         {
             if (!dispatchMapping.TryGetValue(args.GetType(), out string eventName))
             {
-                throw new AssertException($"Assertion error: Undefined event {args}");
+                throw new InvalidOperationException($"Assertion error: Undefined event {args}");
             }
 
             if (dispatcher == null)

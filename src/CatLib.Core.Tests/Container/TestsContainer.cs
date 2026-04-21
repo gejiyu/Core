@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -10,7 +10,6 @@
  */
 
 using CatLib.Container;
-using CatLib.Exception;
 using CatLib.Tests.Fixture;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -65,7 +64,7 @@ namespace CatLib.Tests.Container
 
         [TestMethod]
         [ExpectedExceptionAndMessage(
-            typeof(LogicException),
+            typeof(InvalidOperationException),
             "Tag \"foo\" is not exist.")]
         public void TestTagNotExists()
         {
@@ -94,7 +93,7 @@ namespace CatLib.Tests.Container
         [DataRow(typeof(string[]))]
         [DataRow(typeof(AbstractClass))]
         [DataRow(typeof(IFoo))]
-        [ExpectedExceptionAndMessage(typeof(LogicException), "can not bind.")]
+        [ExpectedExceptionAndMessage(typeof(InvalidOperationException), "can not bind.")]
         public void TestUnableType(Type type)
         {
             container.Bind("foo", type, false);
@@ -168,19 +167,19 @@ namespace CatLib.Tests.Container
         {
             container.Bind("foo", (container, args) => "foo", true);
 
-            Assert.ThrowsException<LogicException>(() =>
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 container.Bind("foo", (container, args) => "repeat bind", false);
             });
 
             container.Instance("bar", "bar");
-            Assert.ThrowsException<LogicException>(() =>
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 container.Bind("bar", (container, args) => "instance repeat bind", false);
             });
 
             container.Alias("foo-alias", "foo");
-            Assert.ThrowsException<LogicException>(() =>
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 container.Bind("foo-alias", (container, args) => "alias repeat bind", false);
             });
@@ -190,7 +189,7 @@ namespace CatLib.Tests.Container
                 container.Bind(null, (container, args) => "invalid service name", false);
             });
 
-            Assert.ThrowsException<LogicException>(() =>
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 container.Bind("$foo", (container, args) => "Illegal placeholder", false);
             });
@@ -235,10 +234,10 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [DataRow("bar-alias", "bar", typeof(LogicException), "Set an alias for a service that does not exist.")]
+        [DataRow("bar-alias", "bar", typeof(InvalidOperationException), "Set an alias for a service that does not exist.")]
         [DataRow(null, "bar", typeof(ArgumentNullException), "Alias name is null.")]
         [DataRow("baz", null, typeof(ArgumentNullException), "Service name is null.")]
-        [DataRow("foo", "foo", typeof(LogicException), "Alias is same as service")]
+        [DataRow("foo", "foo", typeof(InvalidOperationException), "Alias is same as service")]
         public void TestAliasIllegal(string alias, string service, Type expected, string reason)
         {
             container.Bind("foo", (container, args) => "foo", false)
@@ -262,7 +261,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedExceptionAndMessage(typeof(LogicException), "Circular dependency detected while for")]
+        [ExpectedExceptionAndMessage(typeof(InvalidOperationException), "Circular dependency detected while for")]
         public void TestCircularDependencyInject()
         {
             container.Bind("foo", typeof(CircularDependency), false);
@@ -296,7 +295,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedExceptionAndMessage(typeof(LogicException), "Circular dependency detected while for")]
+        [ExpectedExceptionAndMessage(typeof(InvalidOperationException), "Circular dependency detected while for")]
         public void TestCallCircularDependencyInject()
         {
             var service = container.Type2Service(typeof(CircularDependency));
@@ -323,7 +322,7 @@ namespace CatLib.Tests.Container
 
         [TestMethod]
         [ExpectedExceptionAndMessage(
-            typeof(LogicException),
+            typeof(InvalidOperationException),
             "Too many parameters , must be less or equal than 255")]
         public void TestMakearameterOverflow()
         {
@@ -513,7 +512,7 @@ namespace CatLib.Tests.Container
 
         [TestMethod]
         [ExpectedExceptionAndMessage(
-            typeof(LogicException),
+            typeof(InvalidOperationException),
             "can not bind.")]
         public void TestMakeAbstractClass()
         {
@@ -550,7 +549,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedExceptionAndMessage(typeof(AssertException), "marked inject attribute, but the property is not public.")]
+        [ExpectedExceptionAndMessage(typeof(InvalidOperationException), "marked inject attribute, but the property is not public.")]
         public void TestPropertyInjectWithProtectedAccessFailed()
         {
             var service = container.Type2Service(typeof(Foo));
@@ -663,7 +662,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         [DataRow("foo:bar")]
         [DataRow("$foo")]
         [DataRow("foo@bar")]
@@ -673,7 +672,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestInstanceNotAllowedSameObject()
         {
             var foo = new object();
@@ -690,7 +689,7 @@ namespace CatLib.Tests.Container
 
         [TestMethod]
         [ExpectedException(
-            typeof(LogicException),
+            typeof(InvalidOperationException),
             "is not Singleton(Static) Bind.")]
         public void TestInstanceIllegal()
         {
@@ -761,7 +760,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestFlushInstanceService()
         {
             container.Bind("foo", typeof(Foo), true)
@@ -833,7 +832,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestReboundNotExistsService()
         {
             container.OnRebound("foobar", (instance) =>

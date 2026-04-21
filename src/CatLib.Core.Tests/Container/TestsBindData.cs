@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -10,7 +10,6 @@
  */
 
 using CatLib.Container;
-using CatLib.Exception;
 using CatLib.Tests.Fixture;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -63,7 +62,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestNeedsDuplicate()
         {
             bindData.Needs("foo").Given("bar");
@@ -139,7 +138,7 @@ namespace CatLib.Tests.Container
         }
 
         [TestMethod]
-        [ExpectedException(typeof(LogicException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestUnbindAfterChanged()
         {
             bindData.Unbind();

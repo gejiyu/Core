@@ -9,17 +9,23 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Exception;
+using System;
 using System.Diagnostics.CodeAnalysis;
-using SException = System.Exception;
 
 namespace CatLib.Container
 {
     /// <summary>
-    /// Failed to resolve the service exception.
+    /// Thrown when the container cannot resolve a service.
     /// </summary>
+    /// <remarks>
+    /// Inherits from <see cref="InvalidOperationException"/> (previously
+    /// inherited from a custom <c>RuntimeException</c> base class). The
+    /// container rejects a resolve request whenever its own state does
+    /// not support the operation -- that is precisely the semantics
+    /// <see cref="InvalidOperationException"/> is meant for.
+    /// </remarks>
     [ExcludeFromCodeCoverage]
-    public class UnresolvableException : RuntimeException
+    public class UnresolvableException : InvalidOperationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UnresolvableException"/> class.
@@ -42,7 +48,7 @@ namespace CatLib.Container
         /// </summary>
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">The inner exception.</param>
-        public UnresolvableException(string message, SException innerException)
+        public UnresolvableException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

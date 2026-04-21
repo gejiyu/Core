@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the CatLib package.
  *
  * (c) CatLib <support@catlib.io>
@@ -11,7 +11,6 @@
 
 using System;
 using System.Collections.Generic;
-using CatLib.Exception;
 
 namespace CatLib.Container
 {
@@ -73,7 +72,7 @@ namespace CatLib.Container
                 if (contextual.ContainsKey(needs)
                     || (contextualClosure != null && contextualClosure.ContainsKey(needs)))
                 {
-                    throw new LogicException($"Needs [{needs}] is already exist.");
+                    throw new InvalidOperationException($"Needs [{needs}] is already exist.");
                 }
 
                 contextual.Add(needs, given);
@@ -95,7 +94,7 @@ namespace CatLib.Container
                 if (contextualClosure.ContainsKey(needs)
                     || (contextual != null && contextual.ContainsKey(needs)))
                 {
-                    throw new LogicException($"Needs [{needs}] is already exist.");
+                    throw new InvalidOperationException($"Needs [{needs}] is already exist.");
                 }
 
                 contextualClosure.Add(needs, given);
@@ -139,7 +138,7 @@ namespace CatLib.Container
         {
             if (isDestroy)
             {
-                throw new LogicException("The current instance is destroyed.");
+                throw new InvalidOperationException("The current instance is destroyed.");
             }
         }
     }
