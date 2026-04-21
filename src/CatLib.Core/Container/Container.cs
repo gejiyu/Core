@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using System.Threading;
 using SException = System.Exception;
 
 namespace CatLib.Container
@@ -23,7 +24,7 @@ namespace CatLib.Container
     /// <summary>
     /// The catlib ioc container implemented.
     /// </summary>
-    public class Container : IContainer
+    public class Container : IContainer, IDisposable
     {
         /// <summary>
         /// Characters not allowed in the service name.
@@ -116,9 +117,26 @@ namespace CatLib.Container
         private readonly object skipped;
 
         /// <summary>
+        /// Per-thread storage for <see cref="BuildStack"/>.
+        /// The build stack is conceptually local to a single resolution chain; sharing it
+        /// across threads would cause false-positive circular dependency errors.
+        /// </summary>
+        private readonly ThreadLocal<Stack<string>> buildStackLocal;
+
+        /// <summary>
+        /// Per-thread storage for <see cref="UserParamsStack"/>.
+        /// </summary>
+        private readonly ThreadLocal<Stack<object[]>> userParamsStackLocal;
+
+        /// <summary>
         /// Whether the container is flushing.
         /// </summary>
         private bool flushing;
+
+        /// <summary>
+        /// Whether the container has been disposed.
+        /// </summary>
+        private bool disposed;
 
         /// <summary>
         /// The unique Id is used to mark the global build order.
@@ -147,8 +165,8 @@ namespace CatLib.Container
             findTypeCache = new Dictionary<string, Type>(prime * 4);
             rebound = new Dictionary<string, List<Action<object>>>(prime);
             instanceTiming = new SortSet<string, int>();
-            BuildStack = new Stack<string>(32);
-            UserParamsStack = new Stack<object[]>(32);
+            buildStackLocal = new ThreadLocal<Stack<string>>(() => new Stack<string>(32));
+            userParamsStackLocal = new ThreadLocal<Stack<object[]>>(() => new Stack<object[]>(32));
             skipped = new object();
             methodContainer = new MethodContainer(this);
             flushing = false;
@@ -156,14 +174,14 @@ namespace CatLib.Container
         }
 
         /// <summary>
-        /// Gets the stack of concretions currently being built.
+        /// Gets the stack of concretions currently being built on the current thread.
         /// </summary>
-        protected Stack<string> BuildStack { get; }
+        protected Stack<string> BuildStack => buildStackLocal.Value;
 
         /// <summary>
-        /// Gets the stack of the user params being built.
+        /// Gets the stack of the user params being built on the current thread.
         /// </summary>
-        protected Stack<object[]> UserParamsStack { get; }
+        protected Stack<object[]> UserParamsStack => userParamsStackLocal.Value;
 
         /// <inheritdoc />
         public object this[string service]
@@ -715,6 +733,15 @@ namespace CatLib.Container
         public string Type2Service(Type type)
         {
             return type.ToString();
+        }
+
+        /// <summary>
+        /// Releases the resources held by the container, including per-thread build stacks.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -1520,9 +1547,29 @@ namespace CatLib.Container
         }
 
         /// <summary>
-        /// Verify that the current construct is valid.
+        /// Releases the resources held by the container.
         /// </summary>
-        /// <param name="method">Called function name.</param>
+        /// <param name="disposing">True when called from <see cref="Dispose()"/>.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                buildStackLocal.Dispose();
+                userParamsStackLocal.Dispose();
+            }
+
+            disposed = true;
+        }
+
+        /// <summary>
+        /// Guards against unsupported operations during construction.
+        /// </summary>
+        /// <param name="method">The method name of the caller.</param>
         protected virtual void GuardConstruct(string method)
         {
         }

@@ -19,7 +19,7 @@ using CContainer = CatLib.Container.Container;
 namespace CatLib.Tests.Container
 {
     [TestClass]
-    public class TestsBindData
+    public sealed class TestsBindData : IDisposable
     {
         private CContainer container;
         private BindData bindData;
@@ -29,6 +29,12 @@ namespace CatLib.Tests.Container
         {
             container = new CContainer();
             bindData = (BindData)container.Bind("foo", (container, args) => "foo", true);
+        }
+
+        public void Dispose()
+        {
+            container?.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         [TestMethod]

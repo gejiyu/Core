@@ -14,6 +14,7 @@ using CatLib.EventDispatcher;
 using CatLib.Exception;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ using System.Threading.Tasks;
 namespace CatLib.Tests
 {
     [TestClass]
-    public class TestsApplication
+    public sealed class TestsApplication : IDisposable
     {
         private Application application;
         private IEventDispatcher dispatcher;
@@ -31,6 +32,12 @@ namespace CatLib.Tests
         {
             application = new Application();
             dispatcher = application.Make<IEventDispatcher>();
+        }
+
+        public void Dispose()
+        {
+            application?.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         [TestMethod]
