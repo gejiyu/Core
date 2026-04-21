@@ -2,8 +2,31 @@
 
 ## [Unreleased]
 
+#### Removed
+
+- **Breaking:** the `CatLib.IO` module (`CombineStream`, `RingBufferStream`,
+  `SegmentStream`, `WrapperStream`, `StreamExtensions`) has been deleted.
+  These were stream utilities with no dependency on, or from, the container
+  and did not belong in a DI package.
+- **Breaking:** the `CatLib.Util` grab-bag is gone apart from `Guard`.
+  `Arr`, `Str`, `SortSet` and `InternalHelper` were general-purpose helpers
+  that the container barely used; their few in-tree call sites were
+  replaced with BCL equivalents (`List<T>` + `HashSet<T>`, LINQ, inline
+  `Array.Copy`). `Util/Guard.cs` remains because container code depends
+  on it for argument validation.
+- The corresponding test files were removed. Expect a drop from 732 to
+  162 tests; the deleted ones all exercised the removed modules.
+
 #### Changed
 
+- `Container` no longer stores `findType` and `instanceTiming` in
+  `SortSet`. `findType` is now a `List<(Func, int)>` kept sorted on
+  insert by ascending priority; `instanceTiming` is a `List<string>`
+  paired with a `HashSet<string>` so Flush still releases instances
+  LIFO with O(1) existence checks.
+- `ContainerExtensions.BindMethod(string, object, string)` inlines the
+  identifier extraction previously provided by `Str.Method` as a private
+  helper. Behavior is unchanged.
 - CI and the test project moved to .NET 8 (LTS). The core library continues
   to target `netstandard2.0` and is **not** touched - Unity consumers on any
   supported Mono / IL2CPP runtime are unaffected. GitHub Actions now uses

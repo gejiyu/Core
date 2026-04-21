@@ -15,11 +15,16 @@
 
 ## About CatLib
 
-`CatLib` is the lightweight dependency injection container and helper functions library. 
+`CatLib` is a lightweight dependency injection container for .NET.
 
 - [Service Provider](https://catlib.io/lasted/architecture/service-provider.html)
 - [Application](https://catlib.io/lasted/architecture/application.html)
 - [IOC Container](https://catlib.io/lasted/architecture/container.html)
+
+The core package focuses on the container, the Application lifecycle
+and the event dispatcher. Historical side modules (`CatLib.IO` stream
+wrappers and the `Arr`/`Str`/`SortSet` utility bag) have been removed;
+use the BCL or a dedicated package for those concerns.
 
 ## Install CatLib Core
 
