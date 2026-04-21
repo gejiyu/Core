@@ -2,6 +2,33 @@
 
 ## [Unreleased]
 
+#### Changed
+
+- CI and the test project moved to .NET 8 (LTS). The core library continues
+  to target `netstandard2.0` and is **not** touched - Unity consumers on any
+  supported Mono / IL2CPP runtime are unaffected. GitHub Actions now uses
+  `actions/setup-dotnet@v4` with `dotnet-version: 8.0.x` and
+  `actions/checkout@v4`. The `ubuntu-latest` leg of the matrix, which had
+  been failing on the EOL .NET Core 3.0 SDK because of OpenSSL 3.x, passes
+  again.
+- Test dependencies bumped to current stable:
+  `Microsoft.NET.Test.Sdk` 16.2 → 17.11.1, `MSTest.TestAdapter` /
+  `MSTest.TestFramework` 2.0 → 3.6.4, `Moq` 4.13 → 4.20.72,
+  `coverlet.msbuild` 2.7 → 6.0.2.
+- Analyzers bumped: `Microsoft.CodeAnalysis.FxCopAnalyzers` (deprecated) is
+  replaced by `Microsoft.CodeAnalysis.NetAnalyzers` 9.0.0; `StyleCop.Analyzers`
+  1.1.118 → 1.2.0-beta.556; `SonarAnalyzer.CSharp` 7.17 → 10.3. The obsolete
+  explicit `Microsoft.CodeAnalysis.CSharp` pin (only needed by FxCopAnalyzers)
+  is removed. New Sonar rules that would require semantic changes to the
+  netstandard2.0 core are suppressed in `analysis.ruleset`; they can be
+  triaged individually in a follow-up modernization PR.
+
+#### Fixed
+
+- `TestException` in the test project no longer exposes the obsolete
+  `Exception(SerializationInfo, StreamingContext)` constructor (SYSLIB0051
+  in .NET 8); the type is only thrown, never serialized.
+
 #### Added
 
 - `Application` lifecycle methods now explicitly enforce their

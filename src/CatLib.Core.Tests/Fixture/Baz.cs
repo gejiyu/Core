@@ -19,8 +19,7 @@ namespace CatLib.Tests.Fixture
         public Baz(Foo foo, int boo = 100)
         {
             Boo = boo;
-            Assert.AreNotEqual(null, foo);
-            Assert.AreNotEqual(null, boo);
+            Assert.IsNotNull(foo);
         }
 
         [Inject(Required = false)]

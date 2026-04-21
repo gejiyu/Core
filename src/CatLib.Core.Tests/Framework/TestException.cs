@@ -9,7 +9,6 @@
  * Document: https://catlib.io/
  */
 
-using System.Runtime.Serialization;
 using SException = System.Exception;
 
 namespace CatLib.Tests
@@ -27,11 +26,6 @@ namespace CatLib.Tests
 
         public TestException(string message, SException innerException)
             : base(message, innerException)
-        {
-        }
-
-        protected TestException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-            : base(serializationInfo, streamingContext)
         {
         }
     }
