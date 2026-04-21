@@ -11,9 +11,8 @@
 
 #pragma warning disable SA1618
 
-using CatLib.Exception;
-using CatLib.Util;
 using System;
+using CatLib.Exception;
 
 namespace CatLib.Container
 {
@@ -143,7 +142,11 @@ namespace CatLib.Container
         /// <returns>The service binding data.</returns>
         public static IBindData Bind<TService>(this IContainer container, Func<IContainer, object[], object> concrete)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.Bind(container.Type2Service(typeof(TService)), concrete, false);
         }
 
@@ -156,7 +159,11 @@ namespace CatLib.Container
         /// <returns>The service binding data.</returns>
         public static IBindData Bind<TService>(this IContainer container, Func<object[], object> concrete)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.Bind(container.Type2Service(typeof(TService)), (c, p) => concrete.Invoke(p), false);
         }
 
@@ -169,7 +176,11 @@ namespace CatLib.Container
         /// <returns>The service binding data.</returns>
         public static IBindData Bind<TService>(this IContainer container, Func<object> concrete)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.Bind(container.Type2Service(typeof(TService)), (c, p) => concrete.Invoke(), false);
         }
 
@@ -183,7 +194,11 @@ namespace CatLib.Container
         public static IBindData Bind(this IContainer container, string service,
             Func<IContainer, object[], object> concrete)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.Bind(service, concrete, false);
         }
 
@@ -222,7 +237,11 @@ namespace CatLib.Container
         /// <returns>True if register a binding with the container.</returns>
         public static bool BindIf<TService>(this IContainer container, Func<IContainer, object[], object> concrete, out IBindData bindData)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.BindIf(container.Type2Service(typeof(TService)), concrete, false, out bindData);
         }
 
@@ -236,7 +255,11 @@ namespace CatLib.Container
         /// <returns>True if register a binding with the container.</returns>
         public static bool BindIf<TService>(this IContainer container, Func<object[], object> concrete, out IBindData bindData)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.BindIf(container.Type2Service(typeof(TService)), (c, @params) => concrete(@params), false,
                 out bindData);
         }
@@ -251,7 +274,11 @@ namespace CatLib.Container
         /// <returns>True if register a binding with the container.</returns>
         public static bool BindIf<TService>(this IContainer container, Func<object> concrete, out IBindData bindData)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.BindIf(container.Type2Service(typeof(TService)), (c, p) => concrete.Invoke(), false,
                 out bindData);
         }
@@ -317,7 +344,11 @@ namespace CatLib.Container
             this IContainer container,
             Func<IContainer, object[], object> concrete)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.Bind(container.Type2Service(typeof(TService)), concrete, true);
         }
 
@@ -330,7 +361,11 @@ namespace CatLib.Container
         /// <returns>The service binding data.</returns>
         public static IBindData Singleton<TService>(this IContainer container, Func<object[], object> concrete)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.Bind(container.Type2Service(typeof(TService)), (c, p) => concrete.Invoke(p), true);
         }
 
@@ -345,7 +380,11 @@ namespace CatLib.Container
             this IContainer container,
             Func<object> concrete)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.Bind(container.Type2Service(typeof(TService)), (c, p) => concrete.Invoke(), true);
         }
 
@@ -397,7 +436,11 @@ namespace CatLib.Container
         /// <returns>True if register a binding with the container.</returns>
         public static bool SingletonIf<TService>(this IContainer container, Func<object> concrete, out IBindData bindData)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.BindIf(container.Type2Service(typeof(TService)), (c, p) => concrete.Invoke(), true,
                 out bindData);
         }
@@ -412,7 +455,11 @@ namespace CatLib.Container
         /// <returns>True if register a binding with the container.</returns>
         public static bool SingletonIf<TService>(this IContainer container, Func<object[], object> concrete, out IBindData bindData)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null);
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             return container.BindIf(container.Type2Service(typeof(TService)), (c, @params) => concrete(@params), true,
                 out bindData);
         }
@@ -441,8 +488,15 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod(this IContainer container, string method, object target, string call = null)
         {
-            Guard.ParameterNotNull(method, nameof(method));
-            Guard.ParameterNotNull(target, nameof(target));
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             return container.BindMethod(method, target, target.GetType().GetMethod(call ?? ExtractMethodName(method)));
         }
@@ -456,8 +510,16 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod(this IContainer container, string method, Func<object> callback)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.BindMethod(method, callback.Target, callback.Method);
         }
 
@@ -470,8 +532,16 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1>(this IContainer container, string method, Func<T1, object> callback)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.BindMethod(method, callback.Target, callback.Method);
         }
 
@@ -484,8 +554,16 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1, T2>(this IContainer container, string method, Func<T1, T2, object> callback)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.BindMethod(method, callback.Target, callback.Method);
         }
 
@@ -498,8 +576,16 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1, T2, T3>(this IContainer container, string method, Func<T1, T2, T3, object> callback)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.BindMethod(method, callback.Target, callback.Method);
         }
 
@@ -512,8 +598,16 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1, T2, T3, T4>(this IContainer container, string method, Func<T1, T2, T3, T4, object> callback)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.BindMethod(method, callback.Target, callback.Method);
         }
 
@@ -613,7 +707,11 @@ namespace CatLib.Container
         /// <param name="userParams">The user parameters.</param>
         public static void Call<T1>(this IContainer container, Action<T1> method, params object[] userParams)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             container.Call(method.Target, method.Method, userParams);
         }
 
@@ -625,7 +723,11 @@ namespace CatLib.Container
         /// <param name="userParams">The user parameters.</param>
         public static void Call<T1, T2>(this IContainer container, Action<T1, T2> method, params object[] userParams)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             container.Call(method.Target, method.Method, userParams);
         }
 
@@ -637,7 +739,11 @@ namespace CatLib.Container
         /// <param name="userParams">The user parameters.</param>
         public static void Call<T1, T2, T3>(this IContainer container, Action<T1, T2, T3> method, params object[] userParams)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             container.Call(method.Target, method.Method, userParams);
         }
 
@@ -649,7 +755,11 @@ namespace CatLib.Container
         /// <param name="userParams">The user parameters.</param>
         public static void Call<T1, T2, T3, T4>(this IContainer container, Action<T1, T2, T3, T4> method, params object[] userParams)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             container.Call(method.Target, method.Method, userParams);
         }
 
@@ -663,8 +773,15 @@ namespace CatLib.Container
         /// <returns>The return value of method.</returns>
         public static object Call(this IContainer container, object target, string method, params object[] userParams)
         {
-            Guard.ParameterNotNull(method, nameof(method));
-            Guard.ParameterNotNull(target, nameof(target));
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             var methodInfo = target.GetType().GetMethod(method);
 
@@ -858,7 +975,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnRelease(this IContainer container, Action<object> callback)
         {
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.OnRelease((_, instance) => callback(instance));
         }
 
@@ -870,7 +991,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnRelease<T>(this IContainer container, Action<T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return container.OnRelease((_, instance) =>
             {
                 if (instance is T typed)
@@ -888,7 +1013,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnRelease<T>(this IContainer container, Action<IBindData, T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return container.OnRelease((bindData, instance) =>
             {
                 if (instance is T typed)
@@ -906,7 +1035,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnResolving(this IContainer container, Action<object> callback)
         {
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.OnResolving((_, instance) =>
             {
                 callback(instance);
@@ -923,7 +1056,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnResolving<T>(this IContainer container, Action<T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return container.OnResolving((_, instance) =>
             {
                 if (instance is T typed)
@@ -943,7 +1080,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnResolving<T>(this IContainer container, Action<IBindData, T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return container.OnResolving((bindData, instance) =>
             {
                 if (instance is T typed)
@@ -961,7 +1102,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnAfterResolving(this IContainer container, Action<object> callback)
         {
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             return container.OnAfterResolving((_, instance) =>
             {
                 callback(instance);
@@ -978,7 +1123,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnAfterResolving<T>(this IContainer container, Action<T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return container.OnAfterResolving((_, instance) =>
             {
                 if (instance is T typed)
@@ -998,7 +1147,11 @@ namespace CatLib.Container
         /// <returns>Returns the <see cref="IContainer"/> instance.</returns>
         public static IContainer OnAfterResolving<T>(this IContainer container, Action<IBindData, T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return container.OnAfterResolving((bindData, instance) =>
             {
                 if (instance is T typed)
@@ -1016,7 +1169,11 @@ namespace CatLib.Container
         /// <param name="method">The callback.</param>
         public static void Watch<TService>(this IContainer container, Action method)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             container.OnRebound(container.Type2Service(typeof(TService)), (instance) => method());
         }
 
@@ -1028,7 +1185,11 @@ namespace CatLib.Container
         /// <param name="method">The callback.</param>
         public static void Watch<TService>(this IContainer container, Action<TService> method)
         {
-            Guard.Requires<ArgumentNullException>(method != null);
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             container.OnRebound(container.Type2Service(typeof(TService)), (instance) => method((TService)instance));
         }
 

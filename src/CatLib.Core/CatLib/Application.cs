@@ -9,16 +9,15 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Container;
-using CatLib.EventDispatcher;
-using CatLib.Exception;
-using CatLib.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using CatLib.Container;
+using CatLib.EventDispatcher;
+using CatLib.Exception;
 
 namespace CatLib
 {
@@ -133,7 +132,10 @@ namespace CatLib
         public virtual void Bootstrap(params IBootstrap[] bootstraps)
         {
             GuardMainThread();
-            Guard.Requires<ArgumentNullException>(bootstraps != null);
+            if (bootstraps is null)
+            {
+                throw new ArgumentNullException(nameof(bootstraps));
+            }
 
             if (bootstrapped || Process != StartProcess.Construct)
             {
@@ -211,7 +213,10 @@ namespace CatLib
         public virtual void Register(IServiceProvider provider, bool force = false)
         {
             GuardMainThread();
-            Guard.Requires<ArgumentNullException>(provider != null, $"Parameter \"{nameof(provider)}\" can not be null.");
+            if (provider is null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
 
             if (IsRegistered(provider))
             {
@@ -266,7 +271,11 @@ namespace CatLib
         /// <inheritdoc />
         public bool IsRegistered(IServiceProvider provider)
         {
-            Guard.Requires<ArgumentNullException>(provider != null);
+            if (provider is null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
             return loadedProviders.Contains(provider);
         }
 

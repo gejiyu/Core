@@ -9,10 +9,9 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Exception;
-using CatLib.Util;
 using System;
 using System.Collections.Generic;
+using CatLib.Exception;
 using CatLibContainer = CatLib.Container.Container;
 
 namespace CatLib.Container
@@ -58,7 +57,10 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IBindData Alias(string alias)
         {
-            Guard.ParameterNotNull(alias, nameof(alias));
+            if (alias is null)
+            {
+                throw new ArgumentNullException(nameof(alias));
+            }
 
             lock (((CatLibContainer)Container).SyncRoot)
             {
@@ -72,7 +74,10 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IBindData Tag(string tag)
         {
-            Guard.ParameterNotNull(tag, nameof(tag));
+            if (tag is null)
+            {
+                throw new ArgumentNullException(nameof(tag));
+            }
 
             lock (((CatLibContainer)Container).SyncRoot)
             {
@@ -133,7 +138,10 @@ namespace CatLib.Container
 
         private void AddClosure(Action<IBindData, object> closure, ref List<Action<IBindData, object>> collection)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
 
             lock (((CatLibContainer)Container).SyncRoot)
             {

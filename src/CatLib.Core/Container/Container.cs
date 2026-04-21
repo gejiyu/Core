@@ -9,8 +9,6 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Exception;
-using CatLib.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +16,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
+using CatLib.Exception;
 using SException = System.Exception;
 
 namespace CatLib.Container
@@ -222,7 +221,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public void Tag(string tag, params string[] services)
         {
-            Guard.ParameterNotNull(tag, nameof(tag));
+            if (tag is null)
+            {
+                throw new ArgumentNullException(nameof(tag));
+            }
+
             lock (syncRoot)
             {
                 GuardFlushing();
@@ -247,7 +250,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public object[] Tagged(string tag)
         {
-            Guard.ParameterNotNull(tag, nameof(tag));
+            if (tag is null)
+            {
+                throw new ArgumentNullException(nameof(tag));
+            }
+
             lock (syncRoot)
             {
                 if (!tags.TryGetValue(tag, out List<string> services))
@@ -290,7 +297,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public bool HasInstance(string service)
         {
-            Guard.ParameterNotNull(service, nameof(service));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             lock (syncRoot)
             {
                 service = AliasToService(service);
@@ -301,7 +312,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public bool IsResolved(string service)
         {
-            Guard.ParameterNotNull(service, nameof(service));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             lock (syncRoot)
             {
                 service = AliasToService(service);
@@ -312,7 +327,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public bool CanMake(string service)
         {
-            Guard.ParameterNotNull(service, nameof(service));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             lock (syncRoot)
             {
                 service = AliasToService(service);
@@ -346,8 +365,15 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IContainer Alias(string alias, string service)
         {
-            Guard.ParameterNotNull(alias, nameof(alias));
-            Guard.ParameterNotNull(service, nameof(service));
+            if (alias is null)
+            {
+                throw new ArgumentNullException(nameof(alias));
+            }
+
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
 
             if (alias == service)
             {
@@ -423,7 +449,10 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IBindData Bind(string service, Type concrete, bool isStatic)
         {
-            Guard.Requires<ArgumentNullException>(concrete != null, $"Parameter {nameof(concrete)} can not be null.");
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
 
             if (IsUnableType(concrete))
             {
@@ -437,8 +466,16 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IBindData Bind(string service, Func<IContainer, object[], object> concrete, bool isStatic)
         {
-            Guard.ParameterNotNull(service, nameof(service));
-            Guard.ParameterNotNull(concrete, nameof(concrete));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (concrete is null)
+            {
+                throw new ArgumentNullException(nameof(concrete));
+            }
+
             GuardServiceName(service);
 
             lock (syncRoot)
@@ -517,10 +554,14 @@ namespace CatLib.Container
         /// <inheritdoc />
         public object Call(object target, MethodInfo methodInfo, params object[] userParams)
         {
-            Guard.Requires<ArgumentNullException>(methodInfo != null);
-            if (!methodInfo.IsStatic)
+            if (methodInfo is null)
             {
-                Guard.Requires<ArgumentNullException>(target != null);
+                throw new ArgumentNullException(nameof(methodInfo));
+            }
+
+            if (!methodInfo.IsStatic && target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
             }
 
             GuardConstruct(nameof(Call));
@@ -547,7 +588,10 @@ namespace CatLib.Container
         /// <inheritdoc />
         public void Extend(string service, Func<object, IContainer, object> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
 
             lock (syncRoot)
             {
@@ -611,7 +655,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public object Instance(string service, object instance)
         {
-            Guard.ParameterNotNull(service, nameof(service));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             GuardServiceName(service);
 
             lock (syncRoot)
@@ -722,7 +770,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IContainer OnFindType(Func<string, Type> func, int priority = int.MaxValue)
         {
-            Guard.Requires<ArgumentNullException>(func != null);
+            if (func is null)
+            {
+                throw new ArgumentNullException(nameof(func));
+            }
+
             lock (syncRoot)
             {
                 GuardFlushing();
@@ -773,7 +825,10 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IContainer OnRebound(string service, Action<object> callback)
         {
-            Guard.Requires<ArgumentNullException>(callback != null);
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
             lock (syncRoot)
             {
@@ -822,7 +877,10 @@ namespace CatLib.Container
                         Release(instanceTimingOrder[i]);
                     }
 
-                    Guard.Requires<AssertException>(instances.Count <= 0);
+                    if (instances.Count > 0)
+                    {
+                        throw new AssertException();
+                    }
 
                     tags.Clear();
                     aliases.Clear();
@@ -1752,7 +1810,10 @@ namespace CatLib.Container
         /// <returns>The service instance.</returns>
         protected object Resolve(string service, params object[] userParams)
         {
-            Guard.ParameterNotNull(service, nameof(service));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
 
             service = AliasToService(service);
             if (instances.TryGetValue(service, out object instance))
@@ -2077,7 +2138,11 @@ namespace CatLib.Container
         /// <param name="list">The specified list.</param>
         private void AddClosure(Action<IBindData, object> closure, List<Action<IBindData, object>> list)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             GuardFlushing();
             list.Add(closure);
         }

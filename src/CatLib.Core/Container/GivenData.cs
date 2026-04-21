@@ -9,7 +9,6 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Util;
 using System;
 
 namespace CatLib.Container
@@ -36,7 +35,10 @@ namespace CatLib.Container
         /// <inheritdoc />
         public TReturn Given(string service)
         {
-            Guard.ParameterNotNull(service, nameof(service));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
 
             bindable.AddContextual(needs, service);
             return bindable as TReturn;
@@ -51,7 +53,11 @@ namespace CatLib.Container
         /// <inheritdoc />
         public TReturn Given(Func<object> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             bindable.AddContextual(needs, closure);
             return bindable as TReturn;
         }

@@ -9,11 +9,10 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Exception;
-using CatLib.Util;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using CatLib.Exception;
 
 namespace CatLib.Container
 {
@@ -46,12 +45,19 @@ namespace CatLib.Container
         /// <returns>The method binding data.</returns>
         public IMethodBind Bind(string method, object target, MethodInfo methodInfo)
         {
-            Guard.ParameterNotNull(method, nameof(method));
-            Guard.ParameterNotNull(methodInfo, nameof(methodInfo));
-
-            if (!methodInfo.IsStatic)
+            if (method is null)
             {
-                Guard.Requires<ArgumentNullException>(target != null);
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            if (methodInfo is null)
+            {
+                throw new ArgumentNullException(nameof(methodInfo));
+            }
+
+            if (!methodInfo.IsStatic && target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
             }
 
             lock (container.SyncRoot)
@@ -87,7 +93,10 @@ namespace CatLib.Container
         /// <returns>The return value of method.</returns>
         public object Invoke(string method, params object[] userParams)
         {
-            Guard.ParameterNotNull(method, nameof(method));
+            if (method is null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
 
             lock (container.SyncRoot)
             {
@@ -113,7 +122,10 @@ namespace CatLib.Container
         /// </param>
         public void Unbind(object target)
         {
-            Guard.Requires<ArgumentNullException>(target != null);
+            if (target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             lock (container.SyncRoot)
             {

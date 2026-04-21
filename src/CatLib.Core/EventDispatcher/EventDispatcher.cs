@@ -9,11 +9,10 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Exception;
-using CatLib.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CatLib.Exception;
 
 namespace CatLib.EventDispatcher
 {
@@ -54,7 +53,10 @@ namespace CatLib.EventDispatcher
         /// <inheritdoc />
         public virtual void Raise(string eventName, object sender, EventArgs e = null)
         {
-            Guard.Requires<LogicException>(!(sender is EventArgs), $"Passed event args for the parameter {sender}, Did you make a wrong method call?");
+            if (sender is EventArgs)
+            {
+                throw new LogicException($"Passed event args for the parameter {sender}, Did you make a wrong method call?");
+            }
 
             e = e ?? EventArgs.Empty;
             if (!listeners.TryGetValue(eventName, out IList<EventHandler> handlers))

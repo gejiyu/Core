@@ -9,7 +9,6 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Util;
 using System;
 
 namespace CatLib.Container
@@ -29,7 +28,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="IBindData.OnResolving"/>
         public static IBindData OnResolving(this IBindData bindData, Action closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnResolving((_, instance) =>
             {
                 closure();
@@ -39,7 +42,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="IBindData.OnResolving"/>
         public static IBindData OnResolving(this IBindData bindData, Action<object> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnResolving((_, instance) =>
             {
                 closure(instance);
@@ -50,7 +57,11 @@ namespace CatLib.Container
         /// <typeparam name="T">The type of resolve instance.</typeparam>
         public static IBindData OnResolving<T>(this IBindData bindData, Action<T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnResolving((_, instance) =>
             {
                 if (instance is T typed)
@@ -63,7 +74,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="OnResolving{T}(IBindData, Action{T})"/>
         public static IBindData OnResolving<T>(this IBindData bindData, Action<IBindData, T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnResolving((bind, instance) =>
             {
                 if (instance is T typed)
@@ -76,7 +91,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="IBindData.OnAfterResolving"/>
         public static IBindData OnAfterResolving(this IBindData bindData, Action closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnAfterResolving((_, instance) =>
             {
                 closure();
@@ -86,7 +105,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="IBindData.OnAfterResolving"/>
         public static IBindData OnAfterResolving(this IBindData bindData, Action<object> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnAfterResolving((_, instance) =>
             {
                 closure(instance);
@@ -97,7 +120,11 @@ namespace CatLib.Container
         /// <typeparam name="T">The type of resolve instance.</typeparam>
         public static IBindData OnAfterResolving<T>(this IBindData bindData, Action<T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnAfterResolving((_, instance) =>
             {
                 if (instance is T typed)
@@ -110,7 +137,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="OnAfterResolving{T}(IBindData, Action{T})"/>
         public static IBindData OnAfterResolving<T>(this IBindData bindData, Action<IBindData, T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnAfterResolving((bind, instance) =>
             {
                 if (instance is T typed)
@@ -123,7 +154,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="IBindData.OnRelease"/>
         public static IBindData OnRelease(this IBindData bindData, Action closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnRelease((_, __) =>
             {
                 closure();
@@ -133,7 +168,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="IBindData.OnRelease"/>
         public static IBindData OnRelease(this IBindData bindData, Action<object> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnRelease((_, instance) =>
             {
                 closure(instance);
@@ -144,7 +183,11 @@ namespace CatLib.Container
         /// <typeparam name="T">The type of release instance.</typeparam>
         public static IBindData OnRelease<T>(this IBindData bindData, Action<T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnRelease((_, instance) =>
             {
                 if (instance is T typed)
@@ -157,7 +200,11 @@ namespace CatLib.Container
         /// <inheritdoc cref="OnRelease{T}(IBindData, Action{T})"/>
         public static IBindData OnRelease<T>(this IBindData bindData, Action<IBindData, T> closure)
         {
-            Guard.Requires<ArgumentNullException>(closure != null);
+            if (closure is null)
+            {
+                throw new ArgumentNullException(nameof(closure));
+            }
+
             return bindData.OnRelease((bind, instance) =>
             {
                 if (instance is T typed)

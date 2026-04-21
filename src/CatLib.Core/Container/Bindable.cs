@@ -9,10 +9,9 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Exception;
-using CatLib.Util;
 using System;
 using System.Collections.Generic;
+using CatLib.Exception;
 
 namespace CatLib.Container
 {
@@ -164,7 +163,10 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IGivenData<TReturn> Needs(string service)
         {
-            Guard.ParameterNotNull(service, nameof(service));
+            if (service is null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
 
             // Returns a fresh GivenData every call so concurrent fluent chains
             // ("a.Needs(x).Given(y)" on one thread, "a.Needs(p).Given(q)" on
