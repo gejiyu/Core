@@ -20,7 +20,7 @@ namespace CatLib.IO
     /// <summary>
     /// The stream extension function.
     /// </summary>
-    public static class StreamExtension
+    public static class StreamExtensions
     {
         [ThreadStatic]
         private static byte[] buffer;

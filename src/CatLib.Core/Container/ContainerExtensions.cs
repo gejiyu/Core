@@ -20,7 +20,7 @@ namespace CatLib.Container
     /// <summary>
     /// An extension function for <see cref="Container"/>.
     /// </summary>
-    public static class ContainerExtension
+    public static class ContainerExtensions
     {
         /// <summary>
         /// Gets the binding data of the given service.

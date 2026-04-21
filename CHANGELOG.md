@@ -17,6 +17,13 @@
 
 #### Changed (Breaking)
 
+- Static helper classes renamed to the .NET plural convention:
+  `ContainerExtension` -> `ContainerExtensions`,
+  `BindDataExtension` -> `BindDataExtensions`,
+  `StreamExtension` -> `StreamExtensions` (files renamed accordingly).
+- `ServiceProvider.App` (protected property) renamed to `Application` to avoid
+  collision with the (removed) static `App` class and to reflect the type
+  (`IApplication`).
 - Spelling fixes in public API:
   - `StartProcess.Bootstraped` -> `StartProcess.Bootstrapped`.
   - `Container.ResloveClass` / `ResloveAttrClass` / `ResloveFromContextual` ->

@@ -17,7 +17,7 @@ using System.Text;
 namespace CatLib.Tests.IO
 {
     [TestClass]
-    public class TestsStreamExtension
+    public class TestsStreamExtensions
     {
         [TestMethod]
         public void TestAppendTo()

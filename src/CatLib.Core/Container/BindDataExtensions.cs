@@ -17,7 +17,7 @@ namespace CatLib.Container
     /// <summary>
     /// An extension function for <see cref="BindData"/>.
     /// </summary>
-    public static class BindDataExtension
+    public static class BindDataExtensions
     {
         /// <inheritdoc cref="IBindData.Alias"/>
         /// <typeparam name="TAlias">The type convert to alias name.</typeparam>
