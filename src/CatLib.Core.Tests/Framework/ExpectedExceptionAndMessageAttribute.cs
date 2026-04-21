@@ -9,7 +9,6 @@
  * Document: https://catlib.io/
  */
 
-using CatLib.Util;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Text.RegularExpressions;
@@ -58,7 +57,7 @@ namespace CatLib.Tests
 
         private static bool Is(string pattern, string value)
         {
-            return pattern == value || Regex.IsMatch(value, Str.AsteriskWildcard(pattern));
+            return pattern == value || Regex.IsMatch(value, Regex.Escape(pattern).Replace(@"\*", ".*?", StringComparison.Ordinal));
         }
     }
 }
