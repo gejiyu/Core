@@ -141,11 +141,6 @@ namespace CatLib.Container
         /// <returns>The service binding data.</returns>
         public static IBindData Bind<TService>(this IContainer container, Func<IContainer, object[], object> concrete)
         {
-            if (concrete is null)
-            {
-                throw new ArgumentNullException(nameof(concrete));
-            }
-
             return container.Bind(container.Type2Service(typeof(TService)), concrete, false);
         }
 
@@ -193,11 +188,6 @@ namespace CatLib.Container
         public static IBindData Bind(this IContainer container, string service,
             Func<IContainer, object[], object> concrete)
         {
-            if (concrete is null)
-            {
-                throw new ArgumentNullException(nameof(concrete));
-            }
-
             return container.Bind(service, concrete, false);
         }
 
@@ -236,11 +226,6 @@ namespace CatLib.Container
         /// <returns>True if register a binding with the container.</returns>
         public static bool BindIf<TService>(this IContainer container, Func<IContainer, object[], object> concrete, out IBindData bindData)
         {
-            if (concrete is null)
-            {
-                throw new ArgumentNullException(nameof(concrete));
-            }
-
             return container.BindIf(container.Type2Service(typeof(TService)), concrete, false, out bindData);
         }
 
@@ -343,11 +328,6 @@ namespace CatLib.Container
             this IContainer container,
             Func<IContainer, object[], object> concrete)
         {
-            if (concrete is null)
-            {
-                throw new ArgumentNullException(nameof(concrete));
-            }
-
             return container.Bind(container.Type2Service(typeof(TService)), concrete, true);
         }
 
@@ -487,11 +467,10 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod(this IContainer container, string method, object target, string call = null)
         {
-            if (method is null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
-
+            // `target` is dereferenced locally (``target.GetType()``); without
+            // this guard a null target would raise NullReferenceException
+            // instead of the expected ArgumentNullException. The matching
+            // ``method`` check is delegated to ``MethodContainer.Bind``.
             if (target is null)
             {
                 throw new ArgumentNullException(nameof(target));
@@ -509,11 +488,6 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod(this IContainer container, string method, Func<object> callback)
         {
-            if (method is null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
-
             if (callback is null)
             {
                 throw new ArgumentNullException(nameof(callback));
@@ -531,11 +505,6 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1>(this IContainer container, string method, Func<T1, object> callback)
         {
-            if (method is null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
-
             if (callback is null)
             {
                 throw new ArgumentNullException(nameof(callback));
@@ -553,11 +522,6 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1, T2>(this IContainer container, string method, Func<T1, T2, object> callback)
         {
-            if (method is null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
-
             if (callback is null)
             {
                 throw new ArgumentNullException(nameof(callback));
@@ -575,11 +539,6 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1, T2, T3>(this IContainer container, string method, Func<T1, T2, T3, object> callback)
         {
-            if (method is null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
-
             if (callback is null)
             {
                 throw new ArgumentNullException(nameof(callback));
@@ -597,11 +556,6 @@ namespace CatLib.Container
         /// <returns>Returns the method bind instance.</returns>
         public static IMethodBind BindMethod<T1, T2, T3, T4>(this IContainer container, string method, Func<T1, T2, T3, T4, object> callback)
         {
-            if (method is null)
-            {
-                throw new ArgumentNullException(nameof(method));
-            }
-
             if (callback is null)
             {
                 throw new ArgumentNullException(nameof(callback));
