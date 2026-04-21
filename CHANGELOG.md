@@ -17,6 +17,14 @@
 
 #### Changed (Breaking)
 
+- Internal `Container` helpers renamed to match the surrounding verb-first
+  convention (`Make*`, `Resolve*`, `Build`, `Inject`):
+  - `SpeculatedServiceType` -> `SpeculateServiceType` (participle -> verb).
+  - `MakeEmptyBindData` -> `CreateEmptyBindData` (`Make` is reserved for the
+    public resolution pipeline; factory helpers use `Create*`).
+  Note: `BindData.TriggerRelease` was intentionally left unchanged -- it is
+  consistent with `TriggerResolving` / `TriggerAfterResolving` and the
+  corresponding events (`OnRelease` / `OnResolving` / `OnAfterResolving`).
 - Static helper classes renamed to the .NET plural convention:
   `ContainerExtension` -> `ContainerExtensions`,
   `BindDataExtension` -> `BindDataExtensions`,

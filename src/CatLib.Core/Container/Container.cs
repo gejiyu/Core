@@ -259,7 +259,7 @@ namespace CatLib.Container
                 return true;
             }
 
-            var type = SpeculatedServiceType(service);
+            var type = SpeculateServiceType(service);
             return !IsBasicType(type) && !IsUnableType(type);
         }
 
@@ -529,7 +529,7 @@ namespace CatLib.Container
             }
             else
             {
-                bindData = MakeEmptyBindData(service);
+                bindData = CreateEmptyBindData(service);
             }
 
             instance = TriggerOnResolving((BindData)bindData, instance);
@@ -1304,7 +1304,7 @@ namespace CatLib.Container
         {
             if (instance == null)
             {
-                throw MakeBuildFailedException(makeService, SpeculatedServiceType(makeService), null);
+                throw MakeBuildFailedException(makeService, SpeculateServiceType(makeService), null);
             }
         }
 
@@ -1313,7 +1313,7 @@ namespace CatLib.Container
         /// </summary>
         /// <param name="service">The specified service name.</param>
         /// <returns>The speculative service type.</returns>
-        protected virtual Type SpeculatedServiceType(string service)
+        protected virtual Type SpeculateServiceType(string service)
         {
             if (findTypeCache.TryGetValue(service, out Type result))
             {
@@ -1556,7 +1556,7 @@ namespace CatLib.Container
         /// </summary>
         /// <param name="service">The service name.</param>
         /// <returns>The bound data.</returns>
-        protected virtual BindData MakeEmptyBindData(string service)
+        protected virtual BindData CreateEmptyBindData(string service)
         {
             return new BindData(this, service, null, false);
         }
@@ -1621,7 +1621,7 @@ namespace CatLib.Container
         {
             var instance = makeServiceBindData.Concrete != null
                 ? makeServiceBindData.Concrete(this, userParams)
-                : CreateInstance(makeServiceBindData, SpeculatedServiceType(makeServiceBindData.Service),
+                : CreateInstance(makeServiceBindData, SpeculateServiceType(makeServiceBindData.Service),
                     userParams);
 
             return Inject(makeServiceBindData, instance);
@@ -1677,7 +1677,7 @@ namespace CatLib.Container
         {
             return service != null && bindings.TryGetValue(service, out BindData bindData)
                 ? bindData
-                : MakeEmptyBindData(service);
+                : CreateEmptyBindData(service);
         }
 
         /// <summary>
