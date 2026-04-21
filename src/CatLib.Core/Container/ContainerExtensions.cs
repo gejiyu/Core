@@ -444,7 +444,7 @@ namespace CatLib.Container
             Guard.ParameterNotNull(method, nameof(method));
             Guard.ParameterNotNull(target, nameof(target));
 
-            return container.BindMethod(method, target, target.GetType().GetMethod(call ?? Str.Method(method)));
+            return container.BindMethod(method, target, target.GetType().GetMethod(call ?? ExtractMethodName(method)));
         }
 
         /// <summary>
@@ -1065,6 +1065,58 @@ namespace CatLib.Container
         public static Func<object> Factory(this IContainer container, string service, params object[] userParams)
         {
             return () => container.Make(service, userParams);
+        }
+
+        /// <summary>
+        /// Extract the trailing identifier token (method name) from <paramref name="pattern"/>.
+        /// Characters outside [A-Za-z0-9_] act as separators; a trailing run of digits is trimmed
+        /// so inputs like <c>"Foo.Bar42"</c> resolve to <c>"Bar"</c>.
+        /// </summary>
+        /// <remarks>
+        /// Inlined here so <see cref="ContainerExtensions"/> no longer depends on
+        /// <c>CatLib.Util.Str</c>; behavior must match the former <c>Str.Method</c> exactly.
+        /// </remarks>
+        private static string ExtractMethodName(string pattern)
+        {
+            if (string.IsNullOrEmpty(pattern))
+            {
+                return string.Empty;
+            }
+
+            var chars = new char[pattern.Length];
+            var count = 0;
+            for (var i = pattern.Length - 1; i >= 0; i--)
+            {
+                var segment = pattern[i];
+                if ((segment >= 'A' && segment <= 'Z')
+                    || (segment >= 'a' && segment <= 'z')
+                    || (segment >= '0' && segment <= '9')
+                    || segment == '_')
+                {
+                    chars[count++] = segment;
+                    continue;
+                }
+
+                if (count > 0)
+                {
+                    break;
+                }
+            }
+
+            for (var i = count - 1; i >= 0; i--)
+            {
+                if (chars[i] >= '0' && chars[i] <= '9')
+                {
+                    count--;
+                    continue;
+                }
+
+                break;
+            }
+
+            Array.Resize(ref chars, count);
+            Array.Reverse(chars);
+            return new string(chars);
         }
     }
 }
