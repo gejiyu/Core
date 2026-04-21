@@ -1,5 +1,25 @@
 # Release Notes
 
+## [Unreleased]
+
+#### Removed (Breaking)
+
+- Removed the static `CatLib.App` facade class. The global static accessor was a
+  Service Locator that hid dependencies, was not thread-safe, and had grown into
+  a ~700-line god object. Resolve services via constructor injection of
+  `IContainer` / `IApplication` (available as `ServiceProvider.App` inside
+  `Register()` / `Init()`).
+- Removed the generic `CatLib.Facade<TService>` static facade. Inject the
+  service interface directly through the container instead.
+- Removed the `Application.New(bool global = true)` static factory. Use
+  `new Application()` directly; it no longer installs itself as a global
+  singleton.
+
+#### Fixed
+
+- `CombineStream.Seek` now passes the correct `paramName` and `actualValue` to
+  `ArgumentOutOfRangeException` (was a literal description string).
+
 ## [v2.0.0-alpha.1 (2019-12-04)](https://github.com/CatLib/Core/releases/tag/v2.0.0) 
 
 #### Added

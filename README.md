@@ -20,7 +20,6 @@
 - [Service Provider](https://catlib.io/lasted/architecture/service-provider.html)
 - [Application](https://catlib.io/lasted/architecture/application.html)
 - [IOC Container](https://catlib.io/lasted/architecture/container.html)
-- [Facades](https://catlib.io/lasted/architecture/facade.html)
 
 ## Install CatLib Core
 

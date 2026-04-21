@@ -40,7 +40,6 @@ namespace CatLib
         /// <summary>
         /// Initializes a new instance of the <see cref="Application"/> class.
         /// </summary>
-        /// <param name="global">True if sets the instance to <see cref="App"/> facade.</param>
         public Application()
         {
             loadedProviders = new List<IServiceProvider>();
@@ -96,19 +95,6 @@ namespace CatLib
             }
         }
 
-        /// <inheritdoc cref="Application(bool)"/>
-        /// <returns>The CatLib <see cref="Application"/> instance.</returns>
-        public static Application New(bool global = true)
-        {
-            var application = new Application();
-            if (global)
-            {
-                App.That = application;
-            }
-
-            return application;
-        }
-
         /// <summary>
         /// Sets the event dispatcher.
         /// </summary>
@@ -132,11 +118,6 @@ namespace CatLib
             Raise(new BeforeTerminateEventArgs(this));
             Process = StartProcess.Terminating;
             Flush();
-            if (App.That == this)
-            {
-                App.That = null;
-            }
-
             Process = StartProcess.Terminated;
             Raise(new AfterTerminateEventArgs(this));
         }

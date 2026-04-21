@@ -162,7 +162,7 @@ namespace CatLib.IO
 
             if (newGloablPosition < 0 || newGloablPosition > Length)
             {
-                throw new ArgumentOutOfRangeException($"{nameof(offset)} must large than zero or small then {nameof(Length)}");
+                throw new ArgumentOutOfRangeException(nameof(offset), offset, $"Must be larger than zero or smaller than {nameof(Length)}.");
             }
 
             long localPosition = 0;
