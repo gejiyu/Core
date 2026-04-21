@@ -152,11 +152,6 @@ namespace CatLib.Container
         where TReturn : class, IBindable<TReturn>
     {
         /// <summary>
-        /// Indicates the given relationship in the context.
-        /// </summary>
-        private GivenData<TReturn> given;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Bindable{TReturn}"/> class.
         /// </summary>
         /// <param name="container">The container instance.</param>
@@ -171,10 +166,15 @@ namespace CatLib.Container
         {
             Guard.ParameterNotNull(service, nameof(service));
 
-            AssertDestroyed();
-            if (given == null)
+            // Returns a fresh GivenData every call so concurrent fluent chains
+            // ("a.Needs(x).Given(y)" on one thread, "a.Needs(p).Given(q)" on
+            // another) cannot clobber each other through a shared "needs" field.
+            var container = (Container)Container;
+            GivenData<TReturn> given;
+            lock (container.SyncRoot)
             {
-                given = new GivenData<TReturn>((Container)Container, this);
+                AssertDestroyed();
+                given = new GivenData<TReturn>(container, this);
             }
 
             given.Needs(service);

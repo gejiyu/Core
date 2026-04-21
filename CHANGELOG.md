@@ -22,6 +22,18 @@
   (`ThreadLocal<Stack<T>>`). Previously they were shared instance fields,
   which on concurrent `Make()` calls caused false-positive circular-
   dependency exceptions and corrupted user-param lookups.
+- `Container.this[string]` setter, `Container.BindIf` (function overload),
+  `BindData.Alias` / `BindData.Tag` and `Bindable<T>.Needs` are now atomic
+  under the container lock. Previously a concurrent caller could slip
+  between the check and the mutation and cause a spurious
+  "already exists" `LogicException` or leak a partially-configured bind.
+- `Bindable<T>.Needs` no longer caches a single `GivenData<T>` per
+  bindable. Each call returns a fresh context so two threads running
+  independent `Needs(...).Given(...)` chains can no longer clobber each
+  other's pending `needs` field.
+- `Container.Dispose(bool)` now runs under `SyncRoot`, ensuring that a
+  late `Dispose()` call waits for in-flight `Make`/`Bind` calls on other
+  threads to finish before tearing down the per-thread build stacks.
 
 #### Changed
 

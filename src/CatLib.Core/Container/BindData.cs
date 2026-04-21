@@ -58,20 +58,28 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IBindData Alias(string alias)
         {
-            AssertDestroyed();
             Guard.ParameterNotNull(alias, nameof(alias));
 
-            Container.Alias(alias, Service);
+            lock (((CatLibContainer)Container).SyncRoot)
+            {
+                AssertDestroyed();
+                Container.Alias(alias, Service);
+            }
+
             return this;
         }
 
         /// <inheritdoc />
         public IBindData Tag(string tag)
         {
-            AssertDestroyed();
             Guard.ParameterNotNull(tag, nameof(tag));
 
-            Container.Tag(tag, Service);
+            lock (((CatLibContainer)Container).SyncRoot)
+            {
+                AssertDestroyed();
+                Container.Tag(tag, Service);
+            }
+
             return this;
         }
 

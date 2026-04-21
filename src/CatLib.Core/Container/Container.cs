@@ -211,8 +211,11 @@ namespace CatLib.Container
             get => Make(service);
             set
             {
-                GetBind(service)?.Unbind();
-                Bind(service, (container, args) => value, false);
+                lock (syncRoot)
+                {
+                    GetBind(service)?.Unbind();
+                    Bind(service, (container, args) => value, false);
+                }
             }
         }
 
@@ -384,15 +387,18 @@ namespace CatLib.Container
         /// <inheritdoc />
         public bool BindIf(string service, Func<IContainer, object[], object> concrete, bool isStatic, out IBindData bindData)
         {
-            var bind = GetBind(service);
-            if (bind == null && (HasInstance(service) || IsAlias(service)))
+            lock (syncRoot)
             {
-                bindData = null;
-                return false;
-            }
+                var bind = GetBind(service);
+                if (bind == null && (HasInstance(service) || IsAlias(service)))
+                {
+                    bindData = null;
+                    return false;
+                }
 
-            bindData = bind ?? Bind(service, concrete, isStatic);
-            return bind == null;
+                bindData = bind ?? Bind(service, concrete, isStatic);
+                return bind == null;
+            }
         }
 
         /// <inheritdoc />
@@ -1653,21 +1659,30 @@ namespace CatLib.Container
         /// <summary>
         /// Releases the resources held by the container.
         /// </summary>
+        /// <remarks>
+        /// Disposal is serialized through <see cref="SyncRoot"/> so that an
+        /// in-flight operation on another thread finishes before the
+        /// per-thread build stacks are torn down. After disposal the
+        /// container must not be used from any thread.
+        /// </remarks>
         /// <param name="disposing">True when called from <see cref="Dispose()"/>.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
+            lock (syncRoot)
             {
-                return;
-            }
+                if (disposed)
+                {
+                    return;
+                }
 
-            if (disposing)
-            {
-                buildStackLocal.Dispose();
-                userParamsStackLocal.Dispose();
-            }
+                if (disposing)
+                {
+                    buildStackLocal.Dispose();
+                    userParamsStackLocal.Dispose();
+                }
 
-            disposed = true;
+                disposed = true;
+            }
         }
 
         /// <summary>
