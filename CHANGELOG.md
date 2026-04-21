@@ -15,10 +15,24 @@
   `new Application()` directly; it no longer installs itself as a global
   singleton.
 
+#### Changed (Breaking)
+
+- Spelling fixes in public API:
+  - `StartProcess.Bootstraped` -> `StartProcess.Bootstrapped`.
+  - `Container.ResloveClass` / `ResloveAttrClass` / `ResloveFromContextual` ->
+    `ResolveClass` / `ResolveAttrClass` / `ResolveFromContextual`.
+  - `Container.MakeBuildFaildException` -> `MakeBuildFailedException`, and the
+    corresponding error text "Create ... faild" -> "Create ... failed".
+  - `MakeFromContextualClosure` parameter `ouput` -> `output`.
+
 #### Fixed
 
 - `CombineStream.Seek` now passes the correct `paramName` and `actualValue` to
   `ArgumentOutOfRangeException` (was a literal description string).
+- Internal field `Container.afterResloving` renamed to `afterResolving`; doc
+  comments `gloabl`, `speified`, local variable `newGloablPosition`, and test
+  names `TestBoostrap*` / `TestMakeAttributeInjectFaild*` /
+  `TestPropertyInjectWithProtectedAccessFaild` corrected.
 
 ## [v2.0.0-alpha.1 (2019-12-04)](https://github.com/CatLib/Core/releases/tag/v2.0.0) 
 

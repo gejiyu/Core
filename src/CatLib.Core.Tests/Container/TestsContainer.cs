@@ -426,7 +426,7 @@ namespace CatLib.Tests.Container
         [ExpectedException(
             typeof(UnresolvableException),
             "Unresolvable dependency , resolving [Name] in class")]
-        public void TestMakeAttributeInjectFaild()
+        public void TestMakeAttributeInjectFailed()
         {
             container = CreateContainer();
             container.Bind("baz", typeof(Baz), true)
@@ -438,7 +438,7 @@ namespace CatLib.Tests.Container
         [ExpectedExceptionAndMessage(
             typeof(UnresolvableException),
             "Unresolvable dependency , resolving [Qux] in class")]
-        public void TestMakeAttributeInjectFaildWithPrimitiveAttr()
+        public void TestMakeAttributeInjectFailedWithPrimitiveAttr()
         {
             container.Bind("baz", typeof(Baz), true);
             container.Make("baz", new Foo());
@@ -551,7 +551,7 @@ namespace CatLib.Tests.Container
 
         [TestMethod]
         [ExpectedExceptionAndMessage(typeof(AssertException), "marked inject attribute, but the property is not public.")]
-        public void TestPropertyInjectWithProtectedAccessFaild()
+        public void TestPropertyInjectWithProtectedAccessFailed()
         {
             var service = container.Type2Service(typeof(Foo));
             container.Bind(service, typeof(Foo), true);

@@ -57,7 +57,7 @@ namespace CatLib.Container
         /// Add the context with service.
         /// </summary>
         /// <param name="needs">Demand specified service.</param>
-        /// <param name="given">Given speified service or alias.</param>
+        /// <param name="given">Given specified service or alias.</param>
         internal void AddContextual(string needs, string given)
         {
             AssertDestroyed();

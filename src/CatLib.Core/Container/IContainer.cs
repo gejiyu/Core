@@ -212,7 +212,7 @@ namespace CatLib.Container
         /// <see cref="Extend"/> an abstract type in the container.
         /// <para>Allow configuration or replacement of services during service resolving.</para>
         /// </summary>
-        /// <param name="service">The service name or alias, null if the apply to gloabl.</param>
+        /// <param name="service">The service name or alias, null if applied globally.</param>
         /// <param name="closure">The closure replacement instance.</param>
         void Extend(string service, Func<object, IContainer, object> closure);
 

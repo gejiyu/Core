@@ -230,14 +230,14 @@ namespace CatLib.Tests
 
         [TestMethod]
         [ExpectedException(typeof(LogicException))]
-        public void TestBoostrapRepeat()
+        public void TestBootstrapDuplicateBootstrap()
         {
             var foo = new Mock<IBootstrap>().Object;
             application.Bootstrap(foo, foo);
         }
 
         [TestMethod]
-        public void TestBoostrapOrder()
+        public void TestBootstrapOrder()
         {
             var foo = new Mock<IBootstrap>();
             var bar = new Mock<IBootstrap>();

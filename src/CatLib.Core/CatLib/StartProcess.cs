@@ -36,7 +36,7 @@ namespace CatLib
         /// <summary>
         /// After the <see cref="Application.Bootstrap"/> called.
         /// </summary>
-        Bootstraped = 3,
+        Bootstrapped = 3,
 
         /// <summary>
         /// Before the <see cref="Application.Init"/> call.

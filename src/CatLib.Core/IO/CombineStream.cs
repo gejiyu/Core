@@ -144,29 +144,29 @@ namespace CatLib.IO
                 throw new NotSupportedException($"{nameof(CombineStream)} not supported {nameof(Seek)}.");
             }
 
-            long newGloablPosition;
+            long newGlobalPosition;
             switch (origin)
             {
                 case SeekOrigin.Begin:
-                    newGloablPosition = offset;
+                    newGlobalPosition = offset;
                     break;
                 case SeekOrigin.Current:
-                    newGloablPosition = globalPosition + offset;
+                    newGlobalPosition = globalPosition + offset;
                     break;
                 case SeekOrigin.End:
-                    newGloablPosition = Length + offset;
+                    newGlobalPosition = Length + offset;
                     break;
                 default:
                     throw new NotSupportedException($"Not support {nameof(SeekOrigin)}: {origin}");
             }
 
-            if (newGloablPosition < 0 || newGloablPosition > Length)
+            if (newGlobalPosition < 0 || newGlobalPosition > Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset), offset, $"Must be larger than zero or smaller than {nameof(Length)}.");
             }
 
             long localPosition = 0;
-            var newIndex = index = CalculatedIndex(newGloablPosition, ref localPosition);
+            var newIndex = index = CalculatedIndex(newGlobalPosition, ref localPosition);
 
             streams[newIndex].Seek(localPosition, SeekOrigin.Begin);
             while (++newIndex < streams.Length)
@@ -174,7 +174,7 @@ namespace CatLib.IO
                 streams[newIndex].Seek(0, SeekOrigin.Begin);
             }
 
-            return globalPosition = newGloablPosition;
+            return globalPosition = newGlobalPosition;
         }
 
         /// <inheritdoc />

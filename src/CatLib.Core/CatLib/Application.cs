@@ -164,7 +164,7 @@ namespace CatLib
                 }
             }
 
-            Process = StartProcess.Bootstraped;
+            Process = StartProcess.Bootstrapped;
             bootstrapped = true;
             Raise(new AfterBootEventArgs(this));
         }
@@ -179,7 +179,7 @@ namespace CatLib
                 throw new LogicException($"You must call {nameof(Bootstrap)}() first.");
             }
 
-            if (inited || Process != StartProcess.Bootstraped)
+            if (inited || Process != StartProcess.Bootstrapped)
             {
                 throw new LogicException($"Cannot repeatedly trigger the {nameof(Init)}()");
             }

@@ -68,7 +68,7 @@ namespace CatLib.Container
         /// <summary>
         /// All of the global after resolving callbacks.
         /// </summary>
-        private readonly List<Action<IBindData, object>> afterResloving;
+        private readonly List<Action<IBindData, object>> afterResolving;
 
         /// <summary>
         /// All of the global release callbacks.
@@ -139,7 +139,7 @@ namespace CatLib.Container
             instancesReverse = new Dictionary<object, string>(prime * 4);
             bindings = new Dictionary<string, BindData>(prime * 4);
             resolving = new List<Action<IBindData, object>>((int)(prime * 0.25));
-            afterResloving = new List<Action<IBindData, object>>((int)(prime * 0.25));
+            afterResolving = new List<Action<IBindData, object>>((int)(prime * 0.25));
             release = new List<Action<IBindData, object>>((int)(prime * 0.25));
             extenders = new Dictionary<string, List<Func<object, IContainer, object>>>((int)(prime * 0.25));
             resolved = new HashSet<string>();
@@ -640,7 +640,7 @@ namespace CatLib.Container
         /// <inheritdoc />
         public IContainer OnAfterResolving(Action<IBindData, object> closure)
         {
-            AddClosure(closure, afterResloving);
+            AddClosure(closure, afterResolving);
             return this;
         }
 
@@ -807,7 +807,7 @@ namespace CatLib.Container
                     if (baseParam.ParameterType.IsClass
                         || baseParam.ParameterType.IsInterface)
                     {
-                        param = ResloveClass(makeServiceBindData, needService, baseParam);
+                        param = ResolveClass(makeServiceBindData, needService, baseParam);
                     }
                     else
                     {
@@ -1001,18 +1001,18 @@ namespace CatLib.Container
         /// </summary>
         /// <param name="closure">The closure.</param>
         /// <param name="needType">The expected type.</param>
-        /// <param name="ouput">The instance.</param>
+        /// <param name="output">The instance.</param>
         /// <returns>True if the build is successful and matches the expected type, otherwise false.</returns>
-        protected virtual bool MakeFromContextualClosure(Func<object> closure, Type needType, out object ouput)
+        protected virtual bool MakeFromContextualClosure(Func<object> closure, Type needType, out object output)
         {
-            ouput = null;
+            output = null;
             if (closure == null)
             {
                 return false;
             }
 
-            ouput = closure();
-            return ChangeType(ref ouput, needType);
+            output = closure();
+            return ChangeType(ref output, needType);
         }
 
         /// <inheritdoc cref="MakeFromContextualClosure"/>
@@ -1041,7 +1041,7 @@ namespace CatLib.Container
         /// <param name="paramType">The parameter or property type for dependent.</param>
         /// <param name="output">The dependency instance.</param>
         /// <returns>True if build the dependency instance successful. otherwise false.</returns>
-        protected virtual bool ResloveFromContextual(Bindable makeServiceBindData, string service, string paramName,
+        protected virtual bool ResolveFromContextual(Bindable makeServiceBindData, string service, string paramName,
             Type paramType, out object output)
         {
             if (MakeFromContextualClosure(
@@ -1065,7 +1065,7 @@ namespace CatLib.Container
         /// <returns>The dependency instance.</returns>
         protected virtual object ResolveAttrPrimitive(Bindable makeServiceBindData, string service, PropertyInfo baseParam)
         {
-            if (ResloveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.PropertyType,
+            if (ResolveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.PropertyType,
                 out object instance))
             {
                 return instance;
@@ -1090,9 +1090,9 @@ namespace CatLib.Container
         /// <summary>
         /// Resolved the attribute selector's reference type.
         /// </summary>
-        protected virtual object ResloveAttrClass(Bindable makeServiceBindData, string service, PropertyInfo baseParam)
+        protected virtual object ResolveAttrClass(Bindable makeServiceBindData, string service, PropertyInfo baseParam)
         {
-            if (ResloveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.PropertyType,
+            if (ResolveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.PropertyType,
                 out object instance))
             {
                 return instance;
@@ -1116,7 +1116,7 @@ namespace CatLib.Container
         /// <returns>The dependency instance.</returns>
         protected virtual object ResolvePrimitive(Bindable makeServiceBindData, string service, ParameterInfo baseParam)
         {
-            if (ResloveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.ParameterType,
+            if (ResolveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.ParameterType,
                 out object instance))
             {
                 return instance;
@@ -1142,9 +1142,9 @@ namespace CatLib.Container
         /// <summary>
         /// Resolved the constructor's reference type.
         /// </summary>
-        protected virtual object ResloveClass(Bindable makeServiceBindData, string service, ParameterInfo baseParam)
+        protected virtual object ResolveClass(Bindable makeServiceBindData, string service, ParameterInfo baseParam)
         {
-            if (ResloveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.ParameterType,
+            if (ResolveFromContextual(makeServiceBindData, service, baseParam.Name, baseParam.ParameterType,
                 out object instance))
             {
                 return instance;
@@ -1182,19 +1182,19 @@ namespace CatLib.Container
         }
 
         /// <summary>
-        /// Build a reslove failure exception.
+        /// Build a resolve failure exception.
         /// </summary>
         /// <param name="makeService">The <see cref="Make"/> service name.</param>
         /// <param name="makeServiceType">The <see cref="Make"/> service type.</param>
         /// <param name="innerException">The inner exception.</param>
         /// <returns>The resolve failure exception instance.</returns>
-        protected virtual UnresolvableException MakeBuildFaildException(string makeService, Type makeServiceType, SException innerException)
+        protected virtual UnresolvableException MakeBuildFailedException(string makeService, Type makeServiceType, SException innerException)
         {
             var message = new StringBuilder();
 
             if (makeServiceType != null)
             {
-                message.AppendLine($"Create {makeServiceType} faild, service name is {makeService}.");
+                message.AppendLine($"Create {makeServiceType} failed, service name is {makeService}.");
             }
             else
             {
@@ -1304,7 +1304,7 @@ namespace CatLib.Container
         {
             if (instance == null)
             {
-                throw MakeBuildFaildException(makeService, SpeculatedServiceType(makeService), null);
+                throw MakeBuildFailedException(makeService, SpeculatedServiceType(makeService), null);
             }
         }
 
@@ -1357,7 +1357,7 @@ namespace CatLib.Container
                 if (property.PropertyType.IsClass
                     || property.PropertyType.IsInterface)
                 {
-                    instance = ResloveAttrClass(makeServiceBindData, needService, property);
+                    instance = ResolveAttrClass(makeServiceBindData, needService, property);
                 }
                 else
                 {
@@ -1651,7 +1651,7 @@ namespace CatLib.Container
             catch (SException ex)
 #pragma warning restore CA1031
             {
-                throw MakeBuildFaildException(makeServiceBindData.Service, makeServiceType, ex);
+                throw MakeBuildFailedException(makeServiceBindData.Service, makeServiceType, ex);
             }
         }
 
@@ -1722,7 +1722,7 @@ namespace CatLib.Container
         private object TriggerOnAfterResolving(BindData bindData, object instance)
         {
             instance = bindData.TriggerAfterResolving(instance);
-            return Trigger(bindData, instance, afterResloving);
+            return Trigger(bindData, instance, afterResolving);
         }
 
         /// <inheritdoc cref="TriggerOnResolving"/>
