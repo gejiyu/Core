@@ -1,74 +1,126 @@
-﻿<p align="center"><img width="173" height="57" src="https://catlib.io/imgs/logo-txt.png"></p>
+﻿# CatLib.Core
 
-<p align="center">
-<a href="https://github.com/Catlib/Core/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" title="license-mit" /></a>
-<a href="https://www.nuget.org/packages/catlib.core/"><img src="https://badge.fury.io/nu/catlib.core.svg" title="Nuget Version" /></a>
-<a href="https://travis-ci.com/CatLib/Core"><img src="https://travis-ci.com/CatLib/Core.svg?branch=master" title="Build status"/></a>
-<a href="https://github.com/catlib/core/actions"><img src="https://github.com/catlib/core/workflows/catlib/badge.svg" title="Build status"></a>
-<a href="https://codecov.io/gh/CatLib/Core">
-  <img src="https://codecov.io/gh/CatLib/Core/branch/master/graph/badge.svg" alt="Codecov" />
-</a>
-<a href="https://github.com/CatLib/Core/releases">
-  <img src="https://img.shields.io/nuget/dt/CatLib.Core.svg" alt="Downloads" />
-</a>
-</p>
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Build](https://github.com/gejiyu/Core/actions/workflows/catlib.yml/badge.svg?branch=master)](https://github.com/gejiyu/Core/actions/workflows/catlib.yml)
 
-## About CatLib
+`CatLib.Core` is a lightweight dependency-injection container for .NET.
+It targets `netstandard2.0`, which keeps it compatible with modern
+.NET and with older Unity runtimes.
 
-`CatLib` is a lightweight dependency injection container for .NET.
+This repository is a trimmed fork of the original
+[CatLib/Core](https://github.com/CatLib/Core). It focuses purely on the
+IoC container, the `Application` lifecycle and the event dispatcher.
+Everything else has been removed — see [Scope](#scope).
 
-- [Service Provider](https://catlib.io/lasted/architecture/service-provider.html)
-- [Application](https://catlib.io/lasted/architecture/application.html)
-- [IOC Container](https://catlib.io/lasted/architecture/container.html)
+## Highlights
 
-The core package focuses on the container, the Application lifecycle
-and the event dispatcher. Historical side modules have been removed:
+- **Single-file container.** `Container` / `IContainer` covers
+  binding, resolving, aliases, tags, instance decoration, rebinding,
+  release/resolving/after-resolving callbacks, and method binding.
+- **Thread-safe.** Shared state is protected by a single reentrant
+  monitor; per-thread build stacks live in `ThreadLocal<T>`. Stress
+  tests cover parallel bind/make/release.
+- **Main-thread-only lifecycle.** `Application.Bootstrap` / `Init` /
+  `Register` / `Terminate` / `SetDispatcher` / `DebugLevel` throw
+  `InvalidOperationException` if called off the thread that
+  constructed the `Application`.
+- **BCL-only exception surface.** `ArgumentNullException`,
+  `ArgumentException`, `InvalidOperationException`. The only custom
+  type left is `UnresolvableException`, which inherits from
+  `InvalidOperationException`.
+- **No hidden helpers.** No `Guard`, `Arr`, `Str`, `SortSet`,
+  `RuntimeException`, `LogicException`, `AssertException` — null
+  checks and invariant checks are inline at the call site.
 
-- `CatLib.IO` stream wrappers.
-- `CatLib.Util` utility bag (`Arr`, `Str`, `SortSet`, `Guard`, ...);
-  null checks are now inline `ArgumentNullException` throws.
-- `CatLib.Exception` (`RuntimeException`, `LogicException`,
-  `AssertException`); the container raises standard
-  `System.InvalidOperationException` instead. `UnresolvableException`
-  is preserved for "service cannot be resolved" errors and now
-  inherits directly from `InvalidOperationException`.
+## Scope
 
-Use the BCL or a dedicated package if you need any of the removed
-helpers.
+### What's in
 
-## Install CatLib Core
+| Module | What it does |
+|--------|--------------|
+| `CatLib.Container` | `Container`, `IContainer`, `BindData`, `MethodContainer`, extension methods, `UnresolvableException`. |
+| `CatLib.CatLib` (Application) | `Application`, `IApplication`, `StartProcess`, `DebugLevel`, service providers, lifecycle events. |
+| `CatLib.EventDispatcher` | `IEventDispatcher`, `EventDispatcher`, `EventArgs`-based dispatch. |
 
-**Installed with Nuget**
+### What's out
 
-```PM
-$ Install-Package CatLib.Core -Version 2.0.0
-```
+The following modules used to ship with the package and have been
+removed from this fork. If you need them, pull them from the upstream
+CatLib repository or replace them with the BCL.
 
-**Installed with [Bucket](https://github.com/getbucket/bucket)**
+- **`CatLib.IO`** — `CombineStream`, `RingBufferStream`,
+  `SegmentStream`, `WrapperStream`, `StreamExtensions`.
+- **`CatLib.Util`** — `Arr`, `Str`, `SortSet`, `Guard`,
+  `InternalHelper`. Null checks are now inline
+  `ArgumentNullException` throws.
+- **`CatLib.Exception`** — `RuntimeException`, `LogicException`,
+  `AssertException`. The container raises `InvalidOperationException`
+  directly.
+
+## Requirements
+
+- .NET SDK **8.0** to build and run tests.
+- Produced assembly targets **`netstandard2.0`**; usable from any
+  runtime that supports it (including legacy Unity).
+
+## Build & Test
 
 ```shell
-$ bucket require catlib/core
+dotnet build CatLib.Core.sln -c Release
+dotnet test  CatLib.Core.sln -c Release
 ```
 
-**Installed with Github Release**
+CI runs on Windows, macOS and Ubuntu via
+[GitHub Actions](https://github.com/gejiyu/Core/actions/workflows/catlib.yml).
 
-[Download the latest version](https://github.com/CatLib/Core/releases)。
+## Pack
 
-## Learning CatLib
+```shell
+dotnet pack src/CatLib.Core -c Release
+```
 
-CatLib has the most extensive and thorough [documentation](https://catlib.io), making it a breeze to get started with the framework.
+The resulting `.nupkg` lands in `src/CatLib.Core/bin/Release/`.
 
-> 需要中文支持? 请访问[CatLib中文文档](https://zh.catlib.io)。
+## Quick start
 
-## Contribution
+Resolve services against a bare container:
 
-CatLib is still a young framework, and her growth and your contribution are inseparable. If you want to contribute to the project, please refer to: [CatLib Contribution Guide](https://catlib.io/lasted/contribution.html) Your contribution will be included in the list of contributors，Welcome Pull Request!
+```csharp
+using CatLib.Container;
+
+var container = new Container();
+container.Singleton<IMyService, MyService>();
+
+var service = container.Make<IMyService>();
+```
+
+If you want the `Application` lifecycle (bootstraps, service providers,
+lifecycle events), use it exactly like a container with two extra
+phases up front:
+
+```csharp
+using CatLib;
+using CatLib.Container;
+
+var app = new Application();
+app.Bootstrap();
+app.Init();
+
+app.Singleton<IMyService, MyService>();
+
+var service = app.Make<IMyService>();
+```
+
+`Bootstrap`, `Init`, `Register`, `Terminate`, `SetDispatcher` and the
+`DebugLevel` setter must be called from the thread that constructed
+the `Application`; any other thread gets an
+`InvalidOperationException`.
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for the list of changes since the
+last upstream release.
 
 ## License
 
-The open source license used by CatLib is [MIT license](http://opensource.org/licenses/MIT).
-
-## Support
-
-* email: support@catlib.io
-* slack: [catlib.slack](https://catlib.slack.com/messages/internals/)
+[MIT](./LICENSE)
